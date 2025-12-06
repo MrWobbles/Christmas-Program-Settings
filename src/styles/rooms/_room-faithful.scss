@@ -1,0 +1,32 @@
+.room-faithful {
+  background-image: url('/img/Room3.png');
+  background-size: cover;
+  background-position: center;
+}
+
+.character--donkey {
+  left: 0;
+  bottom: 0;
+  top: auto;
+  transform: translateX(-100%);
+  width: 800px;
+  height: 600px;
+  filter: brightness(0.7) drop-shadow(0 20px 40px rgba(0, 0, 0, 0.6));
+  animation: none;
+  transition: transform 1.2s ease-out, opacity 1.6s ease;
+
+  &.show {
+    transform: translateX(0);
+    animation: none;
+    opacity: 0.95;
+  }
+
+  .character__image {
+    background-image: url('/img/donkey-camp.png');
+    transform: scale(1);
+  }
+
+  &.show .character__image {
+    transform: scale(1);
+  }
+}

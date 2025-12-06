@@ -1,0 +1,36 @@
+import type { TimedLyric } from './LyricsManager';
+
+const lyrics: TimedLyric[] = [
+  { start: 4, line: 'Hark! The herald angels sing' },
+  { start: 11, line: 'Glory to the new-born King' },
+  { start: 17, line: 'Peace on earth and mercy mild' },
+  { start: 23, line: 'God and sinners reconciled' },
+  { start: 29, line: 'Joyful all ye nations rise' },
+  { start: 35, line: 'Join the triumph of the skies' },
+  { start: 41, line: 'With angelic host proclaim' },
+  { start: 47, line: 'Christ is born in Bethlehem' },
+  { start: 53, line: 'Hark! The herald angels sing' },
+  { start: 58, line: 'Glory to the new-born King' },
+  { start: 75, line: 'Christ, by highest heaven adored' },
+  { start: 80, line: 'Christ, the everlasting Lord' },
+  { start: 87, line: 'Late in time behold him come' },
+  { start: 93, line: "Offspring of a virgin's womb" },
+  { start: 99, line: 'Veiled in flesh the Godhead see' },
+  { start: 105, line: 'Hail the incarnate Deity' },
+  { start: 111, line: 'Pleased with us in flesh to dwell' },
+  { start: 117, line: 'Jesus, our Immanuel' },
+  { start: 122, line: 'Hark! The herald angels sing' },
+  { start: 128, line: 'Glory to the new-born king' },
+  { start: 156, line: 'Hail the heaven-born Prince of Peace' },
+  { start: 162, line: 'Hail the Son of Righteousness' },
+  { start: 168, line: 'Light and life to all He brings' },
+  { start: 174, line: 'Risen with healing in His wings' },
+  { start: 180, line: 'Mild He lays His glory by' },
+  { start: 186, line: 'Born that man no more may die' },
+  { start: 192, line: 'Born to raise the sons of earth' },
+  { start: 198, line: 'Born to give them second birth' },
+  { start: 204, line: 'Hark! The herald angels sing' },
+  { start: 210, line: 'Glory to the new-born king' }
+];
+
+export default lyrics;

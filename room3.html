@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Room 3 - O Come All Ye Faithful</title>
+</head>
+
+<body class="room-faithful" data-song="o-come-all-ye-faithful">
+    <div class="room-switcher">
+        <div class="room-switcher__tab">Rooms</div>
+        <div class="room-switcher__menu">
+            <a href="/room1.html">Room 1: Emmanuel</a>
+            <a href="/room2.html">Room 2: Twilight</a>
+            <a href="/room3.html">Room 3: O Come All Ye Faithful</a>
+            <a href="/room4.html">Room 4: Joy to the World</a>
+        </div>
+    </div>
+    <canvas class="canvas"></canvas>
+    <div class="character character--donkey">
+        <div class="character__image"></div>
+    </div>
+    <div class="silhouette"></div>
+    <div class="vignette"></div>
+    <div class="lyrics-box lyrics-box--centered">
+        <div class="lyrics-box__text"></div>
+    </div>
+    <div class="media-bar">
+        <div class="media-bar__time-display">00:00 / 00:00</div>
+        <audio id="carol-audio" src="/audio/O_Come_All_Ye_Faithful.mp3" preload="auto"></audio>
+    </div>
+
+    <script type="module" src="/src/main.ts"></script>
+</body>
+
+</html>

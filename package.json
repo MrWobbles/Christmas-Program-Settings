@@ -1,0 +1,28 @@
+{
+  "name": "christmas-program-settings",
+  "version": "1.0.0",
+  "description": "Room 2 scene with lyrics and audio",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MrWobbles/Christmas-Program-Settings.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/MrWobbles/Christmas-Program-Settings/issues"
+  },
+  "homepage": "https://github.com/MrWobbles/Christmas-Program-Settings#readme",
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "sass": "^1.94.2",
+    "typescript": "^5.9.3",
+    "vite": "^7.2.6"
+  }
+}
