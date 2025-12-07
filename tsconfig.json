@@ -11,6 +11,6 @@
     "lib": ["ESNext", "DOM"],
     "skipLibCheck": true
   },
-  "include": ["src/**/*", "room1.html", "room2.html", "room3.html", "room4.html"],
+  "include": ["src/**/*"],
   "references": []
 }
