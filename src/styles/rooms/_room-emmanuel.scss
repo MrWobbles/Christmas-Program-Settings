@@ -1,3 +1,13 @@
 .room-emmanuel {
   background: #000;
+
+  .lyrics-box {
+    left: 50%;
+    top: 50%;
+    transform: translateX(-50%) translateY(-50%) scale(1);
+
+    &.show {
+      transform: translateX(-50%) translateY(-50%) scale(2);
+    }
+  }
 }

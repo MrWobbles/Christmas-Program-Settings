@@ -115,7 +115,6 @@ document.body.addEventListener('click', (e) => {
     pendingPlay = false;
     document.body.classList.add('activated');
     lyricsManager.show();
-    console.log('[Main] Executing deferred play');
     audioEl.play().catch((err) => console.error('[Sync] Deferred play failed:', err));
   }
 });

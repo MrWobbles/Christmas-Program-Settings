@@ -2,6 +2,17 @@
   background-image: url('/img/Room3.png');
   background-size: cover;
   background-position: center;
+
+  .lyrics-box {
+    left: 50%;
+    top: 50%;
+    max-width: 45vw;
+    transform: translateX(-50%) translateY(-50%) scale(1);
+
+    &.show {
+      transform: translateX(-50%) translateY(-50%) scale(2);
+    }
+  }
 }
 
 .character--donkey {
