@@ -4,29 +4,42 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Room 2 - Twilight</title>
-  <script type="module" crossorigin src="/assets/room2-CajU7efs.js"></script>
-  <link rel="stylesheet" crossorigin href="/assets/room2-4B0J7Si5.css">
+    <title>Room 4 - Twilight</title>
+  <script type="module" crossorigin src="assets/main-BoJFlfPh.js"></script>
+  <link rel="stylesheet" crossorigin href="assets/main-B72PhonR.css">
 </head>
 
-<body>
-    <canvas id="canvas"></canvas>
-    <div id="host">
-        <div id="host-img"></div>
+<body class="room-twilight" data-song="hark-herald-angels">
+    <div class="room-switcher">
+        <div class="room-switcher__tab">Rooms</div>
+        <div class="room-switcher__menu">
+            <a href="room1.html">Room 1: Emmanuel</a>
+            <a href="room2.html">Room 2: Twilight</a>
+            <a href="room3.html">Room 3: O Come All Ye Faithful</a>
+            <a href="room4.html">Room 4: Joy to the World</a>
+        </div>
     </div>
-    <div id="angel">
-        <div id="angel-img"></div>
+    <canvas class="canvas"></canvas>
+    <div class="character character--gabriel">
+        <div class="character__image"></div>
     </div>
-    <div id="silhouette"></div>
-    <div id="vignette"></div>
-    <div id="lyrics-box">
-        <div id="lyrics-text"></div>
+    <div class="character character--host">
+        <div class="character__image"></div>
     </div>
-    <div id="media-bar">
-        <div id="time-display">00:00 / 00:00</div>
-        <audio id="carol-audio" src="/audio/Elevation_Worship_-_Hark_The_Herald_Angels_Sing_CeeNaija.com_.mp3" preload="auto"></audio>
+    <div class="character character--host character--host--alt">
+        <div class="character__image"></div>
     </div>
-
+    <div class="silhouette"></div>
+    <div class="vignette"></div>
+    <div class="lyrics-box">
+        <div class="lyrics-box__text"></div>
+    </div>
+    <div class="media-bar">
+        <div class="media-bar__time-display">00:00 / 00:00</div>
+        <audio id="carol-audio" src="assets/Elevation_Worship_-_Hark_The_Herald_Angels_Sing_CeeNaija.com_-B5g-nB9u.mp3" preload="auto"></audio>
+    </div>
+
+
 </body>
 
 </html>
