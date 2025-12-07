@@ -82,11 +82,10 @@ export function initRoom3(
   // Initialize starfield
   new StarfieldRenderer(canvas, ctx);
 
-  let audioStarted = false;
   let currentVerseIndex = 0;
   let clickCount = 0;
 
-  // Two-click activation like Room 2
+  // Multi-click interaction for visual elements
   document.body.addEventListener('click', (e: MouseEvent) => {
     const target = e.target as HTMLElement;
     if (target.closest('.lyrics-box') || target.closest('.media-bar') || target.closest('.room-switcher')) {
@@ -104,46 +103,6 @@ export function initRoom3(
       return;
     }
 
-    if (clickCount === 2 && !audioStarted) {
-      audioStarted = true;
-      console.log('Starting audio and showing lyrics');
-
-      const audioEl = document.getElementById('carol-audio') as HTMLAudioElement | null;
-      if (audioEl) {
-        lyricsManager.show();
-        audioEl.currentTime = 0;
-        audioEl.play().catch((err) => console.error('Audio play error:', err));
-
-        // Update lyrics on each loop to cycle through verses
-        audioEl.addEventListener('ended', async () => {
-          // Dynamically update lyrics for next verse
-          const { verses, refrain } = await import('../lyrics/o-come-all-ye-faithful');
-          currentVerseIndex = (currentVerseIndex + 1) % verses.length;
-          console.log(`Loading verse ${currentVerseIndex + 1} (index ${currentVerseIndex})`);
-          console.log(`First line of verse ${currentVerseIndex + 1}: "${verses[currentVerseIndex][0]}"`);
-          
-          const nextLyrics = [
-            { start: 2, text: verses[currentVerseIndex][0] },
-            { start: 9, text: verses[currentVerseIndex][1] },
-            { start: 18, text: verses[currentVerseIndex][2] },
-            { start: 25, text: refrain[0] },
-            { start: 29, text: refrain[1] },
-            { start: 33, text: refrain[2] },
-            { start: 38, text: refrain[3] },
-          ];
-          lyricsManager.setLyrics(nextLyrics);
-          
-          // Restart audio for next verse
-          audioEl.currentTime = 0;
-          audioEl.play().catch((err) => console.error('Audio play error:', err));
-        });
-      }
-    } else if (clickCount > 2) {
-      // Log timestamp on subsequent clicks
-      const audioEl = document.getElementById('carol-audio') as HTMLAudioElement | null;
-      if (audioEl) {
-        console.log(`Current time: ${audioEl.currentTime.toFixed(2)}s`);
-      }
-    }
+    // Audio playback is now managed by the sync manager in main.ts
   });
 }

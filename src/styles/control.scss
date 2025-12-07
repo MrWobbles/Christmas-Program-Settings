@@ -1,0 +1,447 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height: 100vh;
+  padding: 20px;
+  color: #333;
+}
+
+.control-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+}
+
+.control-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 40px 30px;
+  text-align: center;
+
+  h1 {
+    font-size: 2.5rem;
+    margin-bottom: 10px;
+    font-weight: 700;
+  }
+
+  .control-subtitle {
+    font-size: 1.1rem;
+    opacity: 0.9;
+  }
+}
+
+.control-section {
+  padding: 30px;
+  border-bottom: 1px solid #e0e0e0;
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  h2 {
+    font-size: 1.8rem;
+    margin-bottom: 20px;
+    color: #333;
+    border-bottom: 3px solid #667eea;
+    padding-bottom: 10px;
+  }
+
+  h3 {
+    font-size: 1.2rem;
+    margin-bottom: 15px;
+    color: #555;
+  }
+}
+
+// Code Setup Section
+.code-setup {
+  .setup-form {
+    background: #f5f5f5;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 30px;
+  }
+
+  .form-group {
+    margin-bottom: 20px;
+
+    label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: #333;
+    }
+
+    input {
+      width: 100%;
+      padding: 12px;
+      font-size: 1rem;
+      border: 2px solid #ddd;
+      border-radius: 6px;
+      transition: border-color 0.3s;
+
+      &:focus {
+        outline: none;
+        border-color: #667eea;
+      }
+    }
+
+    .form-hint {
+      font-size: 0.9rem;
+      color: #666;
+      margin-top: 6px;
+      font-style: italic;
+    }
+  }
+
+  .form-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+  }
+
+  .saved-codes {
+    margin-top: 30px;
+
+    .codes-hint {
+      color: #999;
+      font-size: 0.95rem;
+      font-style: italic;
+    }
+  }
+}
+
+// Codes List
+.codes-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 15px;
+
+  .code-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 15px;
+    background: #f0f0f0;
+    border-radius: 6px;
+    border-left: 4px solid #667eea;
+
+    .code-text {
+      flex: 1;
+      font-weight: 600;
+      font-family: "Courier New", monospace;
+      letter-spacing: 1px;
+    }
+
+    .btn {
+      flex-shrink: 0;
+    }
+  }
+}
+
+// Playback Control Section
+.playback-control {
+  .room-status-container {
+    margin-bottom: 40px;
+  }
+
+  .room-status-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 15px;
+    margin-bottom: 20px;
+
+    .room-status-card {
+      background: #f9f9f9;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      padding: 15px;
+      transition: all 0.3s ease;
+
+      h4 {
+        color: #667eea;
+        margin-bottom: 12px;
+        font-size: 1.1rem;
+      }
+
+      .room-status-content {
+        p {
+          font-size: 0.95rem;
+          margin: 6px 0;
+          color: #555;
+
+          strong {
+            color: #333;
+          }
+        }
+      }
+
+      &:hover {
+        border-color: #667eea;
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+      }
+    }
+  }
+
+  .no-rooms-message {
+    text-align: center;
+    padding: 30px;
+    color: #999;
+    font-style: italic;
+  }
+
+  .global-controls,
+  .per-room-controls,
+  .disconnect-section {
+    margin-bottom: 30px;
+  }
+
+  .global-controls,
+  .per-room-controls {
+    background: #f5f5f5;
+    padding: 20px;
+    border-radius: 8px;
+  }
+
+  .control-buttons,
+  .room-controls-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 10px;
+    margin-top: 15px;
+  }
+
+  .room-controls-container {
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+
+    .room-control {
+      background: white;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      padding: 15px;
+
+      h4 {
+        color: #667eea;
+        margin-bottom: 12px;
+        font-size: 1rem;
+      }
+
+      .room-buttons {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+        gap: 8px;
+      }
+    }
+  }
+
+  .disconnect-section {
+    text-align: right;
+  }
+}
+
+// Buttons
+.btn {
+  padding: 10px 20px;
+  font-size: 1rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+
+  &:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  &:active:not(:disabled) {
+    transform: translateY(0);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  &-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+  }
+
+  &-secondary {
+    background: #e0e0e0;
+    color: #333;
+
+    &:hover {
+      background: #d0d0d0;
+    }
+  }
+
+  &-success {
+    background: #4caf50;
+    color: white;
+
+    &:hover {
+      background: #45a049;
+    }
+  }
+
+  &-warning {
+    background: #ff9800;
+    color: white;
+
+    &:hover {
+      background: #e68900;
+    }
+  }
+
+  &-danger {
+    background: #f44336;
+    color: white;
+
+    &:hover {
+      background: #da190b;
+    }
+  }
+
+  &-info {
+    background: #2196f3;
+    color: white;
+
+    &:hover {
+      background: #0b7dda;
+    }
+  }
+
+  &-outline {
+    background: transparent;
+    color: #667eea;
+    border: 2px solid #667eea;
+
+    &:hover {
+      background: #667eea;
+      color: white;
+    }
+
+    &.btn-danger {
+      color: #f44336;
+      border-color: #f44336;
+
+      &:hover {
+        background: #f44336;
+        color: white;
+      }
+    }
+  }
+
+  &-small {
+    padding: 8px 12px;
+    font-size: 0.85rem;
+  }
+}
+
+// Responsive Design
+@media (max-width: 768px) {
+  .control-header {
+    padding: 30px 20px;
+
+    h1 {
+      font-size: 1.8rem;
+    }
+
+    .control-subtitle {
+      font-size: 1rem;
+    }
+  }
+
+  .control-section {
+    padding: 20px;
+
+    h2 {
+      font-size: 1.4rem;
+    }
+
+    h3 {
+      font-size: 1.1rem;
+    }
+  }
+
+  .control-buttons,
+  .room-controls-container {
+    grid-template-columns: 1fr !important;
+  }
+
+  .room-status-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .code-item {
+    flex-direction: column;
+    align-items: flex-start;
+
+    .code-text {
+      width: 100%;
+      margin-bottom: 10px;
+    }
+  }
+
+  .form-actions {
+    flex-direction: column;
+
+    .btn {
+      width: 100%;
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  body {
+    padding: 10px;
+  }
+
+  .control-container {
+    border-radius: 8px;
+  }
+
+  .control-header {
+    padding: 20px 15px;
+
+    h1 {
+      font-size: 1.5rem;
+    }
+
+    .control-subtitle {
+      font-size: 0.9rem;
+    }
+  }
+
+  .control-section {
+    padding: 15px;
+
+    h2 {
+      font-size: 1.2rem;
+      margin-bottom: 15px;
+    }
+
+    h3 {
+      font-size: 1rem;
+    }
+  }
+
+  .btn {
+    padding: 8px 16px;
+    font-size: 0.85rem;
+  }
+}

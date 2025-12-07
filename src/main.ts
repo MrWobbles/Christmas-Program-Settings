@@ -1,5 +1,6 @@
 import './styles/main.scss';
 import { LyricsManager } from './lyrics/LyricsManager';
+import { SyncManager } from './sync/SyncManager';
 
 // Query common elements
 const canvas = document.querySelector('.canvas') as HTMLCanvasElement | null;
@@ -20,14 +21,103 @@ if (!lyricsBox || !lyricsText || !audioEl || !mediaBar || !timeDisplay) {
 // Initialize lyrics manager
 const lyricsManager = new LyricsManager(lyricsBox, lyricsText, audioEl, timeDisplay);
 
-// Defer visual reveal until first meaningful click
-let roomActivated = false;
+// Initialize sync manager (requires sync code in URL parameter)
+let syncManager: SyncManager | null = null;
+const initSync = async (): Promise<void> => {
+  // Check for sync code in URL parameters
+  const params = new URLSearchParams(window.location.search);
+  const syncCode = params.get('sync-code');
+
+  if (syncCode) {
+    try {
+      const roomId = getRoomId();
+      syncManager = new SyncManager(syncCode, roomId);
+      await syncManager.initRoom();
+
+      // Listen for sync commands
+      syncManager.onCommand((command) => {
+        console.log('[Sync] Received command:', command.command);
+        handleSyncCommand(command.command, audioEl);
+      });
+
+      console.log('[Sync] Connected with code:', syncCode);
+    } catch (err) {
+      console.error('[Sync] Failed to initialize:', err);
+    }
+  }
+};
+
+// Helper to get room ID from body class
+function getRoomId(): string {
+  const classList = document.body.className;
+  if (classList.includes('room-twilight')) return 'room-twilight';
+  if (classList.includes('room-emmanuel')) return 'room-emmanuel';
+  if (classList.includes('room-faithful')) return 'room-faithful';
+  if (classList.includes('room-joy')) return 'room-joy';
+  return 'unknown';
+}
+
+// Handle sync commands
+function handleSyncCommand(
+  command: string,
+  audio: HTMLAudioElement
+): void {
+  switch (command) {
+    case 'play':
+      document.body.classList.add('activated');
+      lyricsManager.show();
+      audio.play().catch((err) => {
+        // If play is blocked by autoplay policy, defer it until user interaction
+        if (err.name === 'NotAllowedError') {
+          pendingPlay = true;
+          console.warn('[Sync] Play blocked by autoplay policy, will retry on user interaction');
+        } else {
+          console.error('[Sync] Play failed:', err);
+        }
+      });
+      break;
+    case 'pause':
+      audio.pause();
+      break;
+    case 'stop':
+      audio.pause();
+      audio.currentTime = 0;
+      break;
+    case 'reset':
+      audio.currentTime = 0;
+      audio.pause();
+      document.body.classList.remove('activated');
+      lyricsBox.classList.remove('show');
+      pendingPlay = false;
+      break;
+    case 'activate':
+      document.body.classList.add('activated');
+      break;
+    default:
+      console.log('[Sync] Unknown command:', command);
+  }
+}
+
+// Track user gesture and pending play
+let hasUserGesture = false;
+let pendingPlay = false;
 document.body.addEventListener('click', (e) => {
   const target = e.target as HTMLElement;
-  if (roomActivated) return;
   if (target.closest('.lyrics-box') || target.closest('.media-bar') || target.closest('.room-switcher')) return;
-  roomActivated = true;
-  document.body.classList.add('activated');
+
+  // First click anywhere on the page counts as user gesture (enables autoplay for sync commands)
+  if (!hasUserGesture) {
+    hasUserGesture = true;
+    console.log('[Main] User gesture registered - sync commands can now play audio');
+  }
+
+  if (pendingPlay && audioEl) {
+    pendingPlay = false;
+    document.body.classList.add('activated');
+    lyricsManager.show();
+    console.log('[Main] Executing deferred play');
+    audioEl.play().catch((err) => console.error('[Sync] Deferred play failed:', err));
+  }
 });
 
 // Dynamically load lyrics based on data-song attribute
@@ -97,5 +187,9 @@ async function initializeRoom() {
   }
 }
 
+// Initialize sync system first (async)
+initSync();
+
 // Initialize the room
 initializeRoom();
+

@@ -105,7 +105,6 @@ export function initRoom4(
   // Initialize starfield
   new StarfieldRenderer(canvas, ctx);
 
-  let audioStarted = false;
   let clickCount = 0;
 
   document.body.addEventListener('click', (e: MouseEvent) => {
@@ -121,19 +120,6 @@ export function initRoom4(
       return;
     }
 
-    if (clickCount === 2 && !audioStarted) {
-      audioStarted = true;
-      const audioEl = document.getElementById('carol-audio') as HTMLAudioElement | null;
-      if (audioEl) {
-        lyricsManager.show();
-        audioEl.currentTime = 0;
-        audioEl.play().catch(() => undefined);
-      }
-    } else if (clickCount > 2) {
-      const audioEl = document.getElementById('carol-audio') as HTMLAudioElement | null;
-      if (audioEl) {
-        console.log(`Current time: ${audioEl.currentTime.toFixed(2)}s`);
-      }
-    }
+    // Audio playback is now managed by the sync manager in main.ts
   });
 }
