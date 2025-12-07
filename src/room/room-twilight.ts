@@ -167,7 +167,6 @@ export function initRoom2(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext
     new DragManager(characterManager.getCharacters());
   }
 
-  let audioStarted = false;
   let clickCount = 0;
 
   document.body.addEventListener('click', (e: MouseEvent) => {
@@ -184,14 +183,6 @@ export function initRoom2(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext
       return;
     }
 
-    if (clickCount === 2 && !audioStarted) {
-      audioStarted = true;
-      const audioEl = document.getElementById('carol-audio') as HTMLAudioElement | null;
-      if (audioEl) {
-        lyricsManager.show();
-        audioEl.currentTime = 4;
-        audioEl.play().catch(() => undefined);
-      }
-    }
+    // Audio playback is now managed by the sync manager in main.ts
   });
 }

@@ -236,32 +236,6 @@ export function initRoom1(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext
   // Initialize North Star with rotating stars
   new NorthStarfieldRenderer(canvas, ctx);
 
-  let audioStarted = false;
-
-  // Add click handler to the document body to ensure it captures clicks
-  document.body.addEventListener('click', (e: MouseEvent) => {
-    // Skip if clicking on UI elements
-    const target = e.target as HTMLElement;
-    if (target.closest('.lyrics-box') || target.closest('.media-bar') || target.closest('.room-switcher')) {
-      return;
-    }
-
-    if (!audioStarted) {
-      audioStarted = true;
-      console.log('Starting audio and showing lyrics');
-      
-      const audioEl = document.getElementById('carol-audio') as HTMLAudioElement | null;
-      if (audioEl) {
-        // Show lyrics
-        lyricsManager.show();
-        
-        // Start audio from beginning
-        audioEl.currentTime = 0;
-        audioEl.play().catch((err) => console.error('Audio play error:', err));
-        
-        const currentTime = audioEl.currentTime;
-        console.log(`Current time: ${currentTime.toFixed(2)}s`);
-      }
-    }
-  });
+  // Note: Audio playback is now managed by the sync manager in main.ts
+  // The click handlers in main.ts will handle showing lyrics when audio plays
 }

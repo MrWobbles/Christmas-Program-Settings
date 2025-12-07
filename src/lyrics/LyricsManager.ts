@@ -56,8 +56,9 @@ export class LyricsManager {
   }
 
   private handleTimeUpdate(): void {
-    this.updateLyricByTime(this.audioEl.currentTime);
-    const current = this.formatTime(this.audioEl.currentTime);
+    const currentTime = this.audioEl.currentTime;
+    this.updateLyricByTime(currentTime);
+    const current = this.formatTime(currentTime);
     const duration = this.formatTime(this.audioEl.duration || 0);
     this.timeDisplay.textContent = `${current} / ${duration}`;
   }
