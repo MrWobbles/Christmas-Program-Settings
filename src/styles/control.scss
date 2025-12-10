@@ -854,6 +854,78 @@ body {
         }
       }
     }
+
+    // Room link items with clickable URLs
+    .room-link-item {
+      background: #f5f5f5;
+      padding: 12px;
+      border-radius: 4px;
+      margin-bottom: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+
+      .room-link-meta {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+
+        strong {
+          color: #333;
+          font-size: 0.95rem;
+        }
+
+        .room-link-url {
+          font-size: 0.8rem;
+          color: #667eea;
+          text-decoration: none;
+          word-break: break-all;
+          border-bottom: 1px solid #667eea;
+          padding-bottom: 2px;
+          transition: color 0.2s;
+
+          &:hover {
+            color: #5568d3;
+            border-bottom-color: #5568d3;
+          }
+
+          &:visited {
+            color: #8b7ac6;
+          }
+        }
+      }
+
+      .room-link-actions {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+
+        .btn {
+          flex: 1;
+          min-width: 80px;
+          padding: 8px 12px;
+          background: #667eea;
+          color: white;
+          border: none;
+          border-radius: 4px;
+          font-weight: 600;
+          cursor: pointer;
+          font-size: 0.8rem;
+          text-decoration: none;
+          text-align: center;
+          transition: background 0.3s;
+          display: inline-block;
+
+          &:hover {
+            background: #5568d3;
+          }
+
+          &:active {
+            transform: scale(0.98);
+          }
+        }
+      }
+    }
   }
 
   // Disconnect Section

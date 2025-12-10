@@ -204,17 +204,27 @@ function renderRoomLinks(): void {
     return;
   }
 
+  // Determine base path from current location
+  // If control.html is at /path/to/control.html, extract /path/to/
+  const currentPath = window.location.pathname;
+  const pathParts = currentPath.split('/').filter(p => p); // Remove empty parts
+  pathParts.pop(); // Remove the filename (control.html or control)
+  const basePath = pathParts.length > 0 ? '/' + pathParts.join('/') + '/' : '/';
+  
   const origin = window.location.origin.replace(/\/$/, '');
   const items = Object.entries(ROOM_FILES)
     .map(([roomId, fileName]) => {
-      const url = `${origin}/${fileName}?sync-code=${encodeURIComponent(state.currentCode)}`;
+      const url = `${origin}${basePath}${fileName}?sync-code=${encodeURIComponent(state.currentCode)}`;
       return `
         <div class="room-link-item">
           <div class="room-link-meta">
             <strong>${escapeHtml(ROOM_NAMES[roomId] || roomId)}</strong>
-            <code class="room-link-url">${escapeHtml(url)}</code>
+            <a href="${url}" target="_blank" class="room-link-url">${escapeHtml(url)}</a>
           </div>
-          <button class="btn btn-small btn-outline" data-copy-url="${escapeHtml(url)}">Copy</button>
+          <div class="room-link-actions">
+            <button class="btn btn-small btn-outline" data-copy-url="${escapeHtml(url)}" title="Copy to clipboard">Copy</button>
+            <button class="btn btn-small btn-outline" data-share-messenger="${escapeHtml(url)}" title="Share via Facebook Messenger">Share</button>
+          </div>
         </div>
       `;
     })
@@ -777,9 +787,16 @@ copyAllLinksBtn.addEventListener('click', (e) => {
     alert('Connect with a sync code first.');
     return;
   }
+  
+  // Determine base path from current location
+  const currentPath = window.location.pathname;
+  const pathParts = currentPath.split('/').filter(p => p);
+  pathParts.pop();
+  const basePath = pathParts.length > 0 ? '/' + pathParts.join('/') + '/' : '/';
+  
   const origin = window.location.origin.replace(/\/$/, '');
   const urls = Object.values(ROOM_FILES).map(
-    (fileName) => `${origin}/${fileName}?sync-code=${encodeURIComponent(state.currentCode)}`
+    (fileName) => `${origin}${basePath}${fileName}?sync-code=${encodeURIComponent(state.currentCode)}`
   );
   copyToClipboard(urls.join('\n'), e.target as HTMLElement);
 });
@@ -789,6 +806,14 @@ roomLinksList.addEventListener('click', (event) => {
   const url = target.getAttribute('data-copy-url');
   if (url) {
     copyToClipboard(url, target);
+  }
+  
+  const messengerUrl = target.getAttribute('data-share-messenger');
+  if (messengerUrl) {
+    // Open Facebook Messenger with the link in a new tab
+    // User can then select who to send it to
+    const encodedUrl = encodeURIComponent(messengerUrl);
+    window.open(`https://www.messenger.com/?link=${encodedUrl}`, '_blank', 'width=800,height=600');
   }
 });
 
