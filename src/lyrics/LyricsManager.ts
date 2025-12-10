@@ -6,7 +6,7 @@ export class LyricsManager {
   private audioEl: HTMLAudioElement;
   private timeDisplay: HTMLElement;
   private timedLyrics: Array<{ start: number; line: string }> = [];
-  private currentIdx = 0;
+  private currentIdx = -1;
 
   constructor(
     lyricsBox: HTMLElement,
@@ -28,10 +28,10 @@ export class LyricsManager {
       start: this.parseTime(entry.start),
       line: entry.line || entry.text || ''
     }));
-    this.currentIdx = 0;
+    this.currentIdx = -1;
     // Clear existing lyrics DOM elements before rendering new ones
     this.lyricsText.innerHTML = '';
-    this.renderLyrics(0);
+    this.renderLyrics(-1);
   }
 
   show(): void {

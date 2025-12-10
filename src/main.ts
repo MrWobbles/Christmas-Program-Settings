@@ -135,7 +135,7 @@ function handleSyncCommand(
       audio.currentTime = 0;
       audio.pause();
       document.body.classList.remove('activated');
-      lyricsBox.classList.remove('show');
+      if (lyricsBox) lyricsBox.classList.remove('show');
       pendingPlay = false;
       // Send status update immediately for reset
       if ((window as any).sendStatusUpdate) {
@@ -180,10 +180,10 @@ document.body.addEventListener('click', (e) => {
   const songKey = document.body.getAttribute('data-song') || 'hark-herald-angels';
 
   const songLoaders: Record<string, () => Promise<{ default: TimedLyric[] }>> = {
-    'hark-herald-angels': () => import('./lyrics/hark-herald-angels.ts'),
-    'joy-to-the-world': () => import('./lyrics/joy-to-the-world.ts'),
-    'o-come-o-come-emmanuel': () => import('./lyrics/o-come-o-come-emmanuel.ts'),
-    'o-come-all-ye-faithful': () => import('./lyrics/o-come-all-ye-faithful.ts'),
+    'hark-herald-angels': () => import('./lyrics/hark-herald-angels'),
+    'joy-to-the-world': () => import('./lyrics/joy-to-the-world'),
+    'o-come-o-come-emmanuel': () => import('./lyrics/o-come-o-come-emmanuel'),
+    'o-come-all-ye-faithful': () => import('./lyrics/o-come-all-ye-faithful'),
   };
 
   const loader = songLoaders[songKey] || songLoaders['hark-herald-angels'];

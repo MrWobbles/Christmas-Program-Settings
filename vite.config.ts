@@ -6,6 +6,7 @@ import { join } from 'path';
 export default defineConfig({
   root: '.',
   base: './',
+  publicDir: 'src/assets',
   server: {
     open: 'src/html/control.html'
   },

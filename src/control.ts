@@ -3,7 +3,7 @@ import { SyncManager, type RoomState } from './sync/SyncManager';
 import { getLyrics } from './lyrics/lyricsMap';
 import type { TimedLyric } from './lyrics/LyricsManager';
 import { ROOMS, ROOM_NAMES, ROOM_FILES, LOCAL_STORAGE_KEYS, TIMINGS, COMMANDS } from './config/constants';
-import { escapeHtml, copyToClipboard as copyClipboardUtil, isValidSyncCode } from './config/utils';
+import { copyToClipboard as copyClipboardUtil, isValidSyncCode } from './config/utils';
 
 interface ControlState {
   isConnected: boolean;
@@ -667,7 +667,7 @@ function updateLyricsHighlight(roomId: string, currentTime: number): void {
   const lines = roomControl.querySelectorAll('.lyrics-line') as NodeListOf<HTMLElement>;
   if (lines.length === 0) return;
   
-  let activeIdx = 0;
+  let activeIdx = -1;
 
   // Find the current lyric line
   for (let i = lines.length - 1; i >= 0; i--) {
@@ -730,13 +730,18 @@ function escapeHtml(text: string): string {
   return text.replace(/[&<>"']/g, (c) => map[c]);
 }
 
-async function copyToClipboard(text: string): Promise<void> {
+async function copyToClipboard(text: string, button?: HTMLElement): Promise<void> {
   try {
     await navigator.clipboard.writeText(text);
-    alert('Copied to clipboard');
+    // Flash the button green
+    if (button) {
+      button.style.backgroundColor = '#4CAF50';
+      setTimeout(() => {
+        button.style.backgroundColor = '';
+      }, 400);
+    }
   } catch (err) {
     console.error('Clipboard copy failed:', err);
-    alert('Copy failed. Please copy manually.');
   }
 }
 
@@ -767,7 +772,7 @@ addCodeBtn.addEventListener('click', () => {
 
 disconnectBtn.addEventListener('click', disconnect);
 
-copyAllLinksBtn.addEventListener('click', () => {
+copyAllLinksBtn.addEventListener('click', (e) => {
   if (!state.currentCode) {
     alert('Connect with a sync code first.');
     return;
@@ -776,14 +781,14 @@ copyAllLinksBtn.addEventListener('click', () => {
   const urls = Object.values(ROOM_FILES).map(
     (fileName) => `${origin}/${fileName}?sync-code=${encodeURIComponent(state.currentCode)}`
   );
-  copyToClipboard(urls.join('\n'));
+  copyToClipboard(urls.join('\n'), e.target as HTMLElement);
 });
 
 roomLinksList.addEventListener('click', (event) => {
   const target = event.target as HTMLElement;
   const url = target.getAttribute('data-copy-url');
   if (url) {
-    copyToClipboard(url);
+    copyToClipboard(url, target);
   }
 });
 
@@ -810,6 +815,11 @@ function toggleMenu(): void {
 
 menuToggleBtn.addEventListener('click', toggleMenu);
 menuOverlay.addEventListener('click', toggleMenu);
+
+// Expose functions to global scope for inline onclick handlers
+(window as any).sendCommand = sendCommand;
+(window as any).toggleLyrics = toggleLyrics;
+(window as any).seekToTime = seekToTime;
 
 // Initialize UI
 updateConnectionUI();
