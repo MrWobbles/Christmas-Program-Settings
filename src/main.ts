@@ -18,6 +18,9 @@ if (!lyricsBox || !lyricsText || !audioEl || !mediaBar || !timeDisplay) {
   throw new Error('Required DOM elements are missing');
 }
 
+// Ensure audio starts paused (only sync commands should control playback)
+audioEl.pause();
+
 // Initialize lyrics manager
 const lyricsManager = new LyricsManager(lyricsBox, lyricsText, audioEl, timeDisplay);
 
@@ -36,11 +39,50 @@ const initSync = async (): Promise<void> => {
 
       // Listen for sync commands
       syncManager.onCommand((command) => {
-        console.log('[Sync] Received command:', command.command);
+        console.log('[Sync] Received command:', command.command, 'for room:', roomId);
         handleSyncCommand(command.command, audioEl);
       });
 
       console.log('[Sync] Connected with code:', syncCode);
+
+      // Setup status reporting to sync system (timestamp-based to minimize Firebase writes)
+      const sendStatusUpdate = () => {
+        if (!syncManager || !audioEl) return;
+        const isPlaying = !audioEl.paused;
+        const songId = document.body.getAttribute('data-song') || undefined;
+        syncManager.sendStatus({
+          isActive: true,
+          isPlaying: isPlaying,
+          currentTime: audioEl.currentTime,
+          isActivated: document.body.classList.contains('activated'),
+          playStartTime: isPlaying ? Date.now() : undefined,
+          playStartPosition: isPlaying ? audioEl.currentTime : undefined,
+          songId: songId
+        });
+      };
+
+      // Send status only on significant state changes (no heartbeat needed)
+      audioEl.addEventListener('play', sendStatusUpdate);
+      audioEl.addEventListener('pause', sendStatusUpdate);
+      audioEl.addEventListener('seeked', sendStatusUpdate);
+      audioEl.addEventListener('ended', sendStatusUpdate);
+
+      // Send initial status on page load - force reset state to ensure control panel syncs
+      const songId = document.body.getAttribute('data-song') || undefined;
+      syncManager.sendStatus({
+        isActive: true,
+        isPlaying: false,
+        currentTime: 0,
+        isActivated: false,
+        playStartTime: undefined,
+        playStartPosition: undefined,
+        songId: songId
+      });
+      console.log('[Sync] Sent initial reset status');
+      
+      // Make sendStatusUpdate available globally for command handler
+      (window as any).sendStatusUpdate = sendStatusUpdate;
+
     } catch (err) {
       console.error('[Sync] Failed to initialize:', err);
     }
@@ -78,10 +120,15 @@ function handleSyncCommand(
       break;
     case 'pause':
       audio.pause();
+      // Status update will be triggered by 'pause' event listener
       break;
     case 'stop':
       audio.pause();
       audio.currentTime = 0;
+      // Send status update immediately for stop
+      if ((window as any).sendStatusUpdate) {
+        setTimeout(() => (window as any).sendStatusUpdate(), 50);
+      }
       break;
     case 'reset':
       audio.currentTime = 0;
@@ -89,9 +136,17 @@ function handleSyncCommand(
       document.body.classList.remove('activated');
       lyricsBox.classList.remove('show');
       pendingPlay = false;
+      // Send status update immediately for reset
+      if ((window as any).sendStatusUpdate) {
+        setTimeout(() => (window as any).sendStatusUpdate(), 50);
+      }
       break;
     case 'activate':
       document.body.classList.add('activated');
+      // Send status update for activate
+      if ((window as any).sendStatusUpdate) {
+        setTimeout(() => (window as any).sendStatusUpdate(), 50);
+      }
       break;
     default:
       console.log('[Sync] Unknown command:', command);
@@ -119,11 +174,21 @@ document.body.addEventListener('click', (e) => {
   }
 });
 
-// Dynamically load lyrics based on data-song attribute
+// Dynamically load lyrics based on data-song attribute (explicit map to avoid bundling helper files)
 (async () => {
   const songKey = document.body.getAttribute('data-song') || 'hark-herald-angels';
+
+  const songLoaders: Record<string, () => Promise<{ default: any }>> = {
+    'hark-herald-angels': () => import('./lyrics/hark-herald-angels.ts'),
+    'joy-to-the-world': () => import('./lyrics/joy-to-the-world.ts'),
+    'o-come-o-come-emmanuel': () => import('./lyrics/o-come-o-come-emmanuel.ts'),
+    'o-come-all-ye-faithful': () => import('./lyrics/o-come-all-ye-faithful.ts'),
+  };
+
+  const loader = songLoaders[songKey] || songLoaders['hark-herald-angels'];
+
   try {
-    const module = await import(`./lyrics/${songKey}.ts`);
+    const module = await loader();
     lyricsManager.setLyrics(module.default);
   } catch (err) {
     console.error(`Failed to load lyrics for song: ${songKey}`, err);

@@ -1,48 +1,27 @@
 import type { TimedLyric } from './LyricsManager';
 
-// Verses array - each will be displayed on subsequent loops
-export const verses = [
-  [
-    'O come all ye faithful, joyful and triumphant,',
-    'O come ye, O come ye, to Bethlehem.',
-    'Come and behold him, born the King of angels;'
-  ],
-  [
-    'O Sing, choirs of angels, sing in exultation;',
-    'O sing, all ye citizens of heaven above!',
-    'Glory to God, all glory in the highest;'
-  ],
-  [
-    'O Child, for us sinners poor and in the manger,',
-    'O We would embrace thee with love and awe.',
-    'Who would not love thee, loving us so dearly?'
-  ],
-  [
-    'O Yea, Lord, we greet thee, born this happy morning,',
-    'O Jesus, to thee be all the glory given.',
-    'Word of the Father, now in flesh appearing'
-  ]
-];
-
-export const refrain = [
-  'O come let us adore him,',
-  'O come let us adore him,',
-  'O come let us adore him,',
-  'Christ the Lord.'
-];
-
-// Default lyrics (first verse + refrain) - timestamps based on 41s loop
 const lyrics: TimedLyric[] = [
-  // Verse lines (adjust timing based on actual audio)
-  { start: 2, text: verses[0][0] },
-  { start: 9, text: verses[0][1] },
-  { start: 18, text: verses[0][2] },
-  
-  // Refrain
-  { start: 25, text: refrain[0] },
-  { start: 29, text: refrain[1] },
-  { start: 33, text: refrain[2] },
-  { start: 38, text: refrain[3] },
+  { start: 11, text: 'O come all ye faithful, joyful and triumphant,' },
+  { start: 20, text: 'O come ye, O come ye, to Bethlehem.' },
+  { start: 29, text: 'Come and behold him, born the King of angels;' },
+  { start: 38, text: 'O come let us adore him,' },
+  { start: 43, text: 'O come let us adore him,' },
+  { start: 48, text: 'O come let us adore him,' },
+  { start: 53, text: 'Christ the Lord.' },
+  { start: 59, text: 'Sing, choirs of angels, sing in exultation;' },
+  { start: 67, text: 'O sing, all ye citizens of heaven above!' },
+  { start: 77, text: 'Glory to God, all glory in the highest;' },
+  { start: 86, text: 'O come let us adore him,' },
+  { start: 91, text: 'O come let us adore him,' },
+  { start: 95, text: 'O come let us adore him,' },
+  { start: 101, text: 'Christ the Lord.' },
+  { start: 106, text: 'Yea, Lord, we greet thee, born this happy morning,' },
+  { start: 115, text: 'Jesus, to thee be all the glory given.' },
+  { start: 124, text: 'Word of the Father, now in flesh appearing' },
+  { start: 133, text: 'O come let us adore him,' },
+  { start: 138, text: 'O come let us adore him,' },
+  { start: 143, text: 'O come let us adore him,' },
+  { start: 148, text: 'Christ the Lord.' }
 ];
 
 export default lyrics;

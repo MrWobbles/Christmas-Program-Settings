@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Song Timing Tool</title>
+</head>
+
+<body class="timing-tool">
+  <div class="timing-container">
+    <header class="timing-header">
+      <h1>🎵 Song Timing Tool</h1>
+      <p>Time your songs and generate lyrics JSON</p>
+    </header>
+
+    <main class="timing-main">
+      <!-- Track Selection -->
+      <section class="timing-section track-selector">
+        <h2>Select Track</h2>
+        <div class="tracks-list" id="tracksList">
+          <p class="loading-message">Loading audio files...</p>
+        </div>
+      </section>
+
+      <!-- Lyrics Input -->
+      <section class="timing-section lyrics-input-section" id="lyricsInputSection" style="display: none;">
+        <h2>Load or Paste Lyrics</h2>
+        
+        <div class="lyrics-loading-buttons">
+          <h3>Load Existing</h3>
+          <div class="existing-lyrics-buttons" id="existingLyricsButtons">
+            <!-- Will be populated by JS -->
+          </div>
+        </div>
+
+        <div class="lyrics-input-divider">
+          <span>OR</span>
+        </div>
+
+        <div class="lyrics-paste-section">
+          <h3>Paste New Lyrics</h3>
+          <textarea id="lyricsInput" class="lyrics-textarea" placeholder="Paste your lyrics here, one line per line&#10;Example:&#10;Joy to the world&#10;The Lord is come&#10;Let earth receive..."></textarea>
+          <button id="loadLyricsBtn" class="btn btn-success">Load Lyrics</button>
+        </div>
+      </section>
+
+      <!-- Audio Player -->
+      <section class="timing-section player-section" id="playerSection" style="display: none;">
+        <div class="player-info">
+          <h2 id="trackName">No track selected</h2>
+          <p class="track-filename" id="trackFilename"></p>
+        </div>
+
+        <audio id="audioPlayer" class="audio-player"></audio>
+
+        <div class="player-controls">
+          <button id="playBtn" class="btn btn-play">▶ Play</button>
+          <button id="pauseBtn" class="btn btn-pause">⏸ Pause</button>
+          <button id="stopBtn" class="btn btn-stop">⏹ Stop</button>
+          <div class="time-display">
+            <span id="currentTime">0.00</span> / <span id="duration">0.00</span>s
+          </div>
+        </div>
+
+        <div class="progress-bar">
+          <input type="range" id="progressSlider" class="progress-slider" min="0" max="100" value="0">
+        </div>
+      </section>
+
+      <!-- Timing Controls -->
+      <section class="timing-section timing-controls" id="timingControls" style="display: none;">
+        <h2>Mark Timestamps for Each Line</h2>
+        <p class="timing-hint">Press <kbd>SPACE</kbd> when each line starts to mark its timestamp</p>
+
+        <div class="lyrics-display-section">
+          <div class="lyrics-list" id="lyricsList">
+            <p class="no-lyrics">No lyrics loaded</p>
+          </div>
+        </div>
+
+        <div class="timing-display">
+          <div class="current-time-large" id="currentTimeLarge">0.00s</div>
+          <div class="current-line-display" id="currentLineDisplay">Select a line to start timing</div>
+        </div>
+
+        <div class="action-buttons">
+          <button id="undoBtn" class="btn btn-secondary">Undo Last</button>
+          <button id="clearBtn" class="btn btn-secondary">Clear All</button>
+          <button id="exportBtn" class="btn btn-success">Export TypeScript</button>
+        </div>
+      </section>
+
+      <!-- JSON Output -->
+      <section class="timing-section output-section" id="outputSection" style="display: none;">
+        <h2>Generated TypeScript</h2>
+        <p class="output-hint">Copy and paste this into your lyrics TypeScript file:</p>
+        <pre class="json-output" id="tsOutput"></pre>
+        <button id="copyTsBtn" class="btn btn-success">Copy to Clipboard</button>
+      </section>
+    </main>
+  </div>
+
+  <script type="module" src="../src/timing.ts"></script>
+</body>
+
+</html>

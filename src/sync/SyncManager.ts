@@ -9,6 +9,9 @@ export interface RoomState {
   isPlaying: boolean;
   currentTime: number;
   isActivated: boolean;
+  playStartTime?: number; // Timestamp (Date.now()) when playback started
+  playStartPosition?: number; // Audio position when playback started
+  songId?: string; // Song identifier (e.g., 'o-come-o-come-emmanuel')
 }
 
 export interface SyncCommand {

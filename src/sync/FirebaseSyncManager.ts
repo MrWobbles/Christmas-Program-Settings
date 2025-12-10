@@ -4,6 +4,7 @@ import {
   ref,
   onValue,
   set,
+  update,
   get,
   off,
   type Database,
@@ -32,6 +33,9 @@ export interface FirebaseRoomState {
   currentTime: number;
   isActivated: boolean;
   lastUpdate: number;
+  playStartTime?: number; // Timestamp when playback started
+  playStartPosition?: number; // Audio position when playback started
+  songId?: string; // Song identifier
 }
 
 export interface FirebaseCommand {
@@ -55,7 +59,6 @@ export class FirebaseSyncManager {
   private heartbeatInterval: NodeJS.Timeout | null = null;
   private commandUnsubscribe: (() => void) | null = null;
   private readonly COMMAND_TIMEOUT = 30000; // 30 seconds
-  private readonly HEARTBEAT_INTERVAL = 5000; // 5 seconds
   private ready: Promise<void>;
 
   constructor(config: FirebaseConfig, code: string, roomId: string) {
@@ -98,12 +101,6 @@ export class FirebaseSyncManager {
     // Start listening for commands
     this.setupCommandListener();
 
-    // Start sending heartbeats
-    this.heartbeatInterval = setInterval(() => this.sendHeartbeat(), this.HEARTBEAT_INTERVAL);
-
-    // Send initial heartbeat
-    this.sendHeartbeat();
-
     console.log('[Firebase] Room mode initialized');
   }
 
@@ -117,7 +114,9 @@ export class FirebaseSyncManager {
       return;
     }
 
-    console.log('[Firebase] Control mode initialized');
+    // Listen for real-time room status updates instead of polling
+    this.setupStatusListener();
+    console.log('[Firebase] Control mode initialized with real-time status listener');
   }
 
   /**
@@ -203,18 +202,23 @@ export class FirebaseSyncManager {
       return;
     }
 
-    const fullStatus: FirebaseRoomState = {
+    // Build update object - only include fields that are being updated
+    const updateObj: any = {
       roomId: this.roomId,
-      isActive: true,
-      isPlaying: false,
-      currentTime: 0,
-      isActivated: false,
-      ...status,
       lastUpdate: Date.now(),
+      ...status,
     };
 
+    // Remove any undefined values (Firebase doesn't allow them)
+    Object.keys(updateObj).forEach(key => {
+      if (updateObj[key] === undefined) {
+        delete updateObj[key];
+      }
+    });
+
     try {
-      await set(ref(this.db, `status/${this.code}/${this.roomId}`), fullStatus);
+      // Use update() instead of set() to preserve unspecified fields
+      await update(ref(this.db, `status/${this.code}/${this.roomId}`), updateObj);
     } catch (err) {
       console.error('[Firebase] Failed to send status:', err);
     }
@@ -224,7 +228,6 @@ export class FirebaseSyncManager {
    * Clean up resources
    */
   public destroy(): void {
-    if (this.heartbeatInterval) clearInterval(this.heartbeatInterval);
     if (this.commandUnsubscribe && this.db) {
       const commandRef: DatabaseReference = ref(this.db, `commands/${this.code}`);
       off(commandRef);
@@ -281,12 +284,30 @@ export class FirebaseSyncManager {
   }
 
   /**
-   * Send heartbeat
+   * Setup real-time listener for room status updates (for control panel)
    */
-  private sendHeartbeat(): void {
-    this.sendStatus({
-      isActive: true,
-    });
+  private setupStatusListener(): void {
+    if (!this.initialized || !this.db) {
+      console.error('[Firebase] Cannot setup status listener, not initialized');
+      return;
+    }
+
+    try {
+      const statusRef: DatabaseReference = ref(this.db, `status/${this.code}`);
+
+      onValue(statusRef, (snapshot: any) => {
+        if (snapshot.exists()) {
+          const statusData = snapshot.val() as Record<string, FirebaseRoomState>;
+          
+          // Notify listeners of each room's status as it changes
+          Object.values(statusData).forEach((roomStatus) => {
+            this.statusListeners.forEach((listener) => listener(roomStatus));
+          });
+        }
+      });
+    } catch (err) {
+      console.error('[Firebase] Failed to setup status listener:', err);
+    }
   }
 
   /**

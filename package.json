@@ -4,9 +4,10 @@
   "description": "Room 2 scene with lyrics and audio",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "vite build && vite preview --open",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "serve:dist": "vite build && vite preview --open"
   },
   "repository": {
     "type": "git",
