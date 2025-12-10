@@ -1,4 +1,5 @@
 import './styles/timing.scss';
+import type { TimedLyric } from './lyrics/LyricsManager';
 
 interface LyricLine {
   line: string;
@@ -128,7 +129,7 @@ loadLyricsBtn.addEventListener('click', () => {
 // Load existing lyrics from TS files
 async function loadExistingLyrics(songId: string): Promise<void> {
   try {
-    let lyrics: any[] = [];
+    let lyrics: TimedLyric[] = [];
 
     // Dynamically import the lyrics file
     if (songId === 'hark-herald-angels') {

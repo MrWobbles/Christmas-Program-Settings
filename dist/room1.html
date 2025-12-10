@@ -5,10 +5,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Room 1 - Emmanuel</title>
-  <script type="module" crossorigin src="./assets/preload-helper-DMGCcr4D.js"></script>
-  <script type="module" crossorigin src="./assets/SyncManager-C8GHqpeb.js"></script>
-  <script type="module" crossorigin src="./assets/main-Jl1TipHm.js"></script>
-  <link rel="stylesheet" crossorigin href="./assets/main-KCId_Wnv.css">
+  <script type="module" crossorigin src="././assets/preload-helper-DMGCcr4D.js"></script>
+  <script type="module" crossorigin src="././assets/SyncManager-C8GHqpeb.js"></script>
+  <script type="module" crossorigin src="././assets/main-CA4RPGV2.js"></script>
+  <link rel="stylesheet" crossorigin href="././assets/main-CX41rkuU.css">
 </head>
 
 <body class="room-emmanuel" data-song="o-come-o-come-emmanuel">
@@ -21,15 +21,15 @@
             <a href="room4.html">Room 4: Joy to the World</a>
         </div>
     </div>
-    <canvas class="canvas"></canvas>
-    <div class="silhouette"></div>
-    <div class="vignette"></div>
-    <div class="lyrics-box lyrics-box--centered">
+    <canvas class="canvas" aria-label="Room visualization with animated characters"></canvas>
+    <div class="silhouette" aria-hidden="true"></div>
+    <div class="vignette" aria-hidden="true"></div>
+    <div class="lyrics-box lyrics-box--centered" role="region" aria-label="Song lyrics display">
         <div class="lyrics-box__text"></div>
     </div>
-    <div class="media-bar">
-        <div class="media-bar__time-display">00:00 / 00:00</div>
-        <audio id="carol-audio" src="./audio/O Come O Come Emmanuel.mp3" preload="auto"></audio>
+    <div class="media-bar" role="region" aria-label="Audio player controls">
+        <div class="media-bar__time-display" aria-live="polite" aria-label="Current time and duration">00:00 / 00:00</div>
+        <audio id="carol-audio" src="/audio/O Come O Come Emmanuel.mp3" preload="auto" aria-label="Carol audio track"></audio>
     </div>
 
 </body>

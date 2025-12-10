@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Room 1 - Emmanuel</title>
+</head>
+
+<body class="room-emmanuel" data-song="o-come-o-come-emmanuel">
+    <div class="room-switcher">
+        <div class="room-switcher__tab">Rooms</div>
+        <div class="room-switcher__menu">
+            <a href="room1.html">Room 1: Emmanuel</a>
+            <a href="room2.html">Room 2: Twilight</a>
+            <a href="room3.html">Room 3: O Come All Ye Faithful</a>
+            <a href="room4.html">Room 4: Joy to the World</a>
+        </div>
+    </div>
+    <canvas class="canvas" aria-label="Room visualization with animated characters"></canvas>
+    <div class="silhouette" aria-hidden="true"></div>
+    <div class="vignette" aria-hidden="true"></div>
+    <div class="lyrics-box lyrics-box--centered" role="region" aria-label="Song lyrics display">
+        <div class="lyrics-box__text"></div>
+    </div>
+    <div class="media-bar" role="region" aria-label="Audio player controls">
+        <div class="media-bar__time-display" aria-live="polite" aria-label="Current time and duration">00:00 / 00:00</div>
+        <audio id="carol-audio" src="/audio/O Come O Come Emmanuel.mp3" preload="auto" aria-label="Carol audio track"></audio>
+    </div>
+
+    <script type="module" src="../main.ts"></script>
+</body>
+
+</html>

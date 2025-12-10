@@ -1,6 +1,7 @@
 import './styles/main.scss';
 import { LyricsManager } from './lyrics/LyricsManager';
 import { SyncManager } from './sync/SyncManager';
+import type { TimedLyric } from './lyrics/LyricsManager';
 
 // Query common elements
 const canvas = document.querySelector('.canvas') as HTMLCanvasElement | null;
@@ -178,7 +179,7 @@ document.body.addEventListener('click', (e) => {
 (async () => {
   const songKey = document.body.getAttribute('data-song') || 'hark-herald-angels';
 
-  const songLoaders: Record<string, () => Promise<{ default: any }>> = {
+  const songLoaders: Record<string, () => Promise<{ default: TimedLyric[] }>> = {
     'hark-herald-angels': () => import('./lyrics/hark-herald-angels.ts'),
     'joy-to-the-world': () => import('./lyrics/joy-to-the-world.ts'),
     'o-come-o-come-emmanuel': () => import('./lyrics/o-come-o-come-emmanuel.ts'),

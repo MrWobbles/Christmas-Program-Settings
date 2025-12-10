@@ -14,9 +14,9 @@
       <p>Time your songs and generate lyrics JSON</p>
     </header>
 
-    <main class="timing-main">
+    <main class="timing-main" id="mainContent" role="main">
       <!-- Track Selection -->
-      <section class="timing-section track-selector">
+      <section class="timing-section track-selector" aria-label="Audio track selection">
         <h2>Select Track</h2>
         <div class="tracks-list" id="tracksList">
           <p class="loading-message">Loading audio files...</p>
@@ -101,7 +101,7 @@
     </main>
   </div>
 
-  <script type="module" src="../src/timing.ts"></script>
+  <script type="module" src="../timing.ts"></script>
 </body>
 
 </html>

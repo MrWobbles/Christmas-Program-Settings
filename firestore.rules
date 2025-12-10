@@ -1,0 +1,42 @@
+{
+  "rules": {
+    "commands": {
+      "$code": {
+        // Validate that the code is an uppercase alphanumeric string
+        ".validate": "newData.child('code').val() === $code && $code.matches(/^[A-Z0-9\\-]{3,20}$/)",
+        
+        // Only allow writes to valid command structures
+        ".write": "newData.hasChildren(['id', 'code', 'command', 'timestamp']) &&
+                   newData.child('id').isString() &&
+                   newData.child('code').isString() &&
+                   newData.child('command').isString() &&
+                   newData.child('timestamp').isNumber() &&
+                   newData.child('command').val() in ['play', 'pause', 'seek', 'activate', 'stop', 'reset'] &&
+                   newData.child('timestamp').val() > now - 30000",
+        
+        ".read": "data.child('code').val() === $code"
+      }
+    },
+    "status": {
+      "$code": {
+        ".validate": "$code.matches(/^[A-Z0-9\\-]{3,20}$/)",
+        
+        "$roomId": {
+          // Validate room state structure
+          ".validate": "newData.hasChildren(['roomId', 'isActive', 'lastUpdate']) &&
+                        newData.child('roomId').val() === $roomId &&
+                        newData.child('lastUpdate').isNumber()",
+          
+          // Only allow the specific room to write its own status
+          ".write": "auth.uid === $roomId || root.child('allowedWriters').child($roomId).exists()",
+          
+          ".read": "data.child('code').val() === $code"
+        }
+      }
+    },
+    "allowedWriters": {
+      ".read": false,
+      ".write": false
+    }
+  }
+}

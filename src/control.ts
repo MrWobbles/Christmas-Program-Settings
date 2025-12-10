@@ -2,6 +2,8 @@ import './styles/control.scss';
 import { SyncManager, type RoomState } from './sync/SyncManager';
 import { getLyrics } from './lyrics/lyricsMap';
 import type { TimedLyric } from './lyrics/LyricsManager';
+import { ROOMS, ROOM_NAMES, ROOM_FILES, LOCAL_STORAGE_KEYS, TIMINGS, COMMANDS } from './config/constants';
+import { escapeHtml, copyToClipboard as copyClipboardUtil, isValidSyncCode } from './config/utils';
 
 interface ControlState {
   isConnected: boolean;
@@ -17,17 +19,15 @@ const state: ControlState = {
   lyricsCache: {},
 };
 
-const ROOM_NAMES: Record<string, string> = {
-  'room-emmanuel': 'Room 1: Emmanuel',
-  'room-twilight': 'Room 2: Twilight',
-  'room-faithful': 'Room 3: Faithful',
-  'room-joy': 'Room 4: Joy',
-};
-
 // DOM Elements
 const menuToggleBtn = document.getElementById('menuToggleBtn')!;
 const menuOverlay = document.getElementById('menuOverlay')!;
 const menuPanel = document.getElementById('menuPanel')!;
+
+// Set initial ARIA attributes
+menuToggleBtn.setAttribute('aria-expanded', 'false');
+menuToggleBtn.setAttribute('aria-label', 'Toggle menu');
+
 const codeSetupSection = document.getElementById('codeSetupSection')!;
 const playbackSection = document.getElementById('playbackSection')!;
 const globalControlsMenu = document.getElementById('globalControlsMenu')!;
@@ -49,17 +49,10 @@ const globalResetBtn = document.getElementById('globalResetBtn')!;
 const roomLinksList = document.getElementById('roomLinksList')!;
 const copyAllLinksBtn = document.getElementById('copyAllLinksBtn')!;
 
-const ROOM_FILES: Record<string, string> = {
-  'room-emmanuel': 'room1.html',
-  'room-twilight': 'room2.html',
-  'room-faithful': 'room3.html',
-  'room-joy': 'room4.html',
-};
-
 // Load saved codes on page load
 function loadSavedCodes(): void {
   try {
-    const codesJson = localStorage.getItem('christmas_sync_codes');
+    const codesJson = localStorage.getItem(LOCAL_STORAGE_KEYS.SYNC_CODES);
     const codes = codesJson ? JSON.parse(codesJson) : [];
 
     if (codes.length === 0) {
@@ -71,14 +64,30 @@ function loadSavedCodes(): void {
     codesList.innerHTML = codes
       .map(
         (code: string) => `
-      <div class="code-item">
+      <div class="code-item" data-code="${escapeHtml(code)}">
         <span class="code-text">${escapeHtml(code)}</span>
-        <button class="btn btn-small btn-outline" data-code="${escapeHtml(code)}" onclick="connectToCode('${escapeHtml(code)}')">Connect</button>
-        <button class="btn btn-small btn-outline btn-danger" data-code="${escapeHtml(code)}" onclick="removeCode('${escapeHtml(code)}')">Remove</button>
+        <button class="btn btn-small btn-outline code-connect-btn">Connect</button>
+        <button class="btn btn-small btn-outline btn-danger code-remove-btn">Remove</button>
       </div>
     `
       )
       .join('');
+
+    // Add event listeners to buttons using event delegation
+    codesList.addEventListener('click', (e) => {
+      const target = e.target as HTMLElement;
+      const item = target.closest('.code-item');
+      if (!item) return;
+
+      const code = item.getAttribute('data-code');
+      if (!code) return;
+
+      if (target.classList.contains('code-connect-btn')) {
+        connectToCode(code);
+      } else if (target.classList.contains('code-remove-btn')) {
+        removeCode(code);
+      }
+    });
   } catch (err) {
     console.error('Failed to load saved codes:', err);
   }
@@ -94,10 +103,10 @@ function connectToCode(code: string): void {
 function removeCode(code: string): void {
   if (confirm(`Remove code "${code}"?`)) {
     try {
-      const codesJson = localStorage.getItem('christmas_sync_codes');
+      const codesJson = localStorage.getItem(LOCAL_STORAGE_KEYS.SYNC_CODES);
       let codes = codesJson ? JSON.parse(codesJson) : [];
       codes = codes.filter((c: string) => c !== code);
-      localStorage.setItem('christmas_sync_codes', JSON.stringify(codes));
+      localStorage.setItem(LOCAL_STORAGE_KEYS.SYNC_CODES, JSON.stringify(codes));
       loadSavedCodes();
     } catch (err) {
       console.error('Failed to remove code:', err);
@@ -108,10 +117,15 @@ function removeCode(code: string): void {
 
 // Connect to sync system
 async function connect(): Promise<void> {
-  const code = syncCodeInput.value.trim();
+  const code = syncCodeInput.value.trim().toUpperCase();
 
   if (!code) {
     alert('Please enter a sync code');
+    return;
+  }
+
+  if (!isValidSyncCode(code)) {
+    alert('Invalid sync code: must be 3-20 characters, letters/numbers/hyphens only');
     return;
   }
 
@@ -702,7 +716,7 @@ function updateLocalTimers(): void {
 }
 
 // Update local timers every 500ms for smooth display (independent of Firebase updates)
-setInterval(updateLocalTimers, 500);
+setInterval(updateLocalTimers, TIMINGS.LOCAL_TIMER_UPDATE);
 
 // Escape HTML
 function escapeHtml(text: string): string {
@@ -736,10 +750,10 @@ addCodeBtn.addEventListener('click', () => {
   }
 
   try {
-    let codes = JSON.parse(localStorage.getItem('christmas_sync_codes') || '[]');
+    let codes = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEYS.SYNC_CODES) || '[]');
     if (!codes.includes(code.toUpperCase())) {
       codes.push(code.toUpperCase());
-      localStorage.setItem('christmas_sync_codes', JSON.stringify(codes));
+      localStorage.setItem(LOCAL_STORAGE_KEYS.SYNC_CODES, JSON.stringify(codes));
       alert('Code added successfully');
       loadSavedCodes();
     } else {
@@ -785,21 +799,17 @@ function toggleMenu(): void {
     menuPanel.classList.remove('menu-panel--open');
     menuOverlay.classList.remove('menu-overlay--open');
     menuToggleBtn.textContent = '☰';
+    menuToggleBtn.setAttribute('aria-expanded', 'false');
   } else {
     menuPanel.classList.add('menu-panel--open');
     menuOverlay.classList.add('menu-overlay--open');
     menuToggleBtn.textContent = '✕';
+    menuToggleBtn.setAttribute('aria-expanded', 'true');
   }
 }
 
 menuToggleBtn.addEventListener('click', toggleMenu);
 menuOverlay.addEventListener('click', toggleMenu);
-
-// Expose functions globally for onclick handlers
-(window as any).connectToCode = connectToCode;
-(window as any).removeCode = removeCode;
-(window as any).sendCommand = sendCommand;
-(window as any).toggleLyrics = toggleLyrics;
 
 // Initialize UI
 updateConnectionUI();

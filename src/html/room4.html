@@ -4,10 +4,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Room 2 - Twilight</title>
+  <title>Room 4 - Joy to the World</title>
 </head>
 
-<body class="room-twilight" data-song="hark-herald-angels">
+<body class="room-joy" data-song="joy-to-the-world">
   <div class="room-switcher">
     <div class="room-switcher__tab">Rooms</div>
     <div class="room-switcher__menu">
@@ -18,27 +18,22 @@
     </div>
   </div>
   <canvas class="canvas"></canvas>
-  <div class="character character--gabriel">
+
+
+  <!-- Central angel 4 -->
+  <div class="character character--angel4">
     <div class="character__image"></div>
-  </div>
-  <div class="character character--host">
-    <div class="character__image"></div>
-  </div>
-  <div class="character character--host character--host--alt">
-    <div class="character__image"></div>
-  </div>
-  <div class="silhouette"></div>
-  <div class="vignette"></div>
-  <div class="lyrics-box">
-    <div class="lyrics-box__text"></div>
-  </div>
-  <div class="media-bar">
-    <div class="media-bar__time-display">00:00 / 00:00</div>
-    <audio id="carol-audio" src="/audio/Hark the Herald Angels Sing.mp3"
-      preload="auto"></audio>
   </div>
 
-  <script type="module" src="../src/main.ts"></script>
+  <div class="silhouette"></div>
+  <div class="vignette"></div>
+  <div class="lyrics-box lyrics-box--bottom-left">
+    <div class="lyrics-box__text"></div>
+  </div>
+    <div class="media-bar">
+        <div class="media-bar__time-display">00:00 / 00:00</div>
+    <audio id="carol-audio" src="/audio/Joy to the World.mp3" preload="auto"></audio>
+    </div>  <script type="module" src="../main.ts"></script>
 </body>
 
 </html>

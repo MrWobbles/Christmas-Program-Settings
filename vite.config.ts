@@ -7,18 +7,18 @@ export default defineConfig({
   root: '.',
   base: './',
   server: {
-    open: 'html/control.html'
+    open: 'src/html/control.html'
   },
   optimizeDeps: {
     // Limit dependency scan to our app pages so Vite does not crawl the entire user profile for *.html
     entries: [
-      resolve(__dirname, 'html/room1.html'),
-      resolve(__dirname, 'html/room2.html'),
-      resolve(__dirname, 'html/room3.html'),
-      resolve(__dirname, 'html/room4.html'),
-      resolve(__dirname, 'html/control.html'),
-      resolve(__dirname, 'html/timing.html'),
-      resolve(__dirname, 'html/index.html')
+      resolve(__dirname, 'src/html/room1.html'),
+      resolve(__dirname, 'src/html/room2.html'),
+      resolve(__dirname, 'src/html/room3.html'),
+      resolve(__dirname, 'src/html/room4.html'),
+      resolve(__dirname, 'src/html/control.html'),
+      resolve(__dirname, 'src/html/timing.html'),
+      resolve(__dirname, 'src/html/index.html')
     ]
   },
   build: {
@@ -26,13 +26,13 @@ export default defineConfig({
     emptyOutDir: true,
     rollupOptions: {
       input: {
-        room1: resolve(__dirname, 'html/room1.html'),
-        room2: resolve(__dirname, 'html/room2.html'),
-        room3: resolve(__dirname, 'html/room3.html'),
-        room4: resolve(__dirname, 'html/room4.html'),
-        control: resolve(__dirname, 'html/control.html'),
-        timing: resolve(__dirname, 'html/timing.html'),
-        index: resolve(__dirname, 'html/index.html')
+        room1: resolve(__dirname, 'src/html/room1.html'),
+        room2: resolve(__dirname, 'src/html/room2.html'),
+        room3: resolve(__dirname, 'src/html/room3.html'),
+        room4: resolve(__dirname, 'src/html/room4.html'),
+        control: resolve(__dirname, 'src/html/control.html'),
+        timing: resolve(__dirname, 'src/html/timing.html'),
+        index: resolve(__dirname, 'src/html/index.html')
       }
     }
   },
@@ -41,8 +41,8 @@ export default defineConfig({
       name: 'flatten-html',
       apply: 'build', // Only run during build, not dev server
       closeBundle() {
-        // Move HTML files from dist/html to dist root
-        const htmlDir = join(__dirname, 'dist', 'html');
+        // Move HTML files from dist/src/html to dist root
+        const htmlDir = join(__dirname, 'dist', 'src', 'html');
         const distDir = join(__dirname, 'dist');
         
         try {
@@ -58,8 +58,9 @@ export default defineConfig({
               unlinkSync(filePath);
             }
           });
-          // Remove empty html directory
+          // Remove empty src/html directory structure
           rmdirSync(htmlDir);
+          rmdirSync(join(__dirname, 'dist', 'src'));
         } catch (err) {
           console.warn('Could not flatten HTML files:', err);
         }
