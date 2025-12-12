@@ -10,10 +10,10 @@
 <body class="control-panel">
   <!-- Skip to main content link -->
   <a href="#mainContent" class="skip-link">Skip to main content</a>
-  
+
   <!-- Menu Overlay -->
   <div class="menu-overlay" id="menuOverlay" aria-hidden="true"></div>
-  
+
   <!-- Menu Panel -->
   <div class="menu-panel" id="menuPanel" role="navigation" aria-label="Main menu">
     <!-- Code Setup Section -->
@@ -22,7 +22,8 @@
       <div class="setup-form">
         <div class="form-group">
           <label for="syncCodeInput">Enter Sync Code:</label>
-          <input type="text" id="syncCodeInput" placeholder="e.g., CHRISTMAS-2025" maxlength="20" aria-describedby="codeInputHint" />
+          <input type="text" id="syncCodeInput" placeholder="e.g., CHRISTMAS-2025" maxlength="20"
+            aria-describedby="codeInputHint" />
           <p class="form-hint" id="codeInputHint">Use the same code on all room displays for synchronization</p>
         </div>
         <div class="form-actions">
@@ -90,6 +91,7 @@
       <!-- Per-Room Controls -->
       <div class="per-room-controls">
         <h3>Per-Room Controls</h3>
+        <div class="room-nav" id="roomNav"></div>
         <div class="room-controls-container" id="roomControlsContainer"></div>
       </div>
     </section>

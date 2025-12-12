@@ -10,6 +10,7 @@ interface ControlState {
   currentCode: string;
   syncManager: SyncManager | null;
   lyricsCache: Record<string, TimedLyric[]>; // Cache loaded lyrics
+  activeRoomId: string | null;
 }
 
 const state: ControlState = {
@@ -17,6 +18,101 @@ const state: ControlState = {
   currentCode: '',
   syncManager: null,
   lyricsCache: {},
+  activeRoomId: null,
+};
+
+const ROOM_ORDER = [ROOMS.EMMANUEL, ROOMS.TWILIGHT, ROOMS.FAITHFUL, ROOMS.JOY];
+const addedRooms = new Set<string>();
+
+const ROOM_SCRIPTS: Record<string, { lines: { speaker: string; text: string }[]; cue: string }> = {
+  'room-emmanuel': {
+    lines: [
+      {
+        speaker: 'Angel (Narrator)',
+        text:
+          "Before shepherds watched, before Mary believed, before a baby's cry filled Bethlehem, God made a promise. His people waited for hope to come, not in power or armies, but in love. The prophets spoke of a Messiah who would bring light to the darkness.",
+      },
+      {
+        speaker: 'Isaiah',
+        text:
+          'Read Isaiah 9:6-7<br/>For unto us a Child is born, unto us a Son is given; And the government will be upon His shoulder. And His name will be called Wonderful, Counselor, Mighty God, Everlasting Father, Prince of Peace.',
+      },
+      {
+        speaker: 'Angel (Narrator)',
+        text:
+          "From the very beginning, God's plan was redemption. And heaven waited for the day when His Word would become flesh.",
+      },
+    ],
+    cue: 'Cue Singing (O Come Emmanuel)',
+  },
+  'room-twilight': {
+    lines: [
+      {
+        speaker: 'Angel (Narrator)',
+        text:
+          'When the time was right, God sent one of us to deliver the message. Gabriel was sent to a young woman named Mary, chosen by grace to bear the Savior.',
+      },
+      {
+        speaker: 'Gabriel',
+        text:
+          "Luke 1:30-33 (NKJV)<br/>Then the angel said to her, 'Do not be afraid, Mary, for you have found favor with God. And behold, you will conceive in your womb and bring forth a Son, and shall call His name Jesus. He will be great, and will be called the Son of the Highest; and the Lord God will give Him the throne of His father David. And He will reign over the house of Jacob forever, and of His kingdom there will be no end.'",
+      },
+      {
+        speaker: 'Mary',
+        text:
+          "Luke 1:38 (NKJV)<br/>Then Mary said, 'Behold the maidservant of the Lord! Let it be to me according to your word.' And the angel departed from her.",
+      },
+      {
+        speaker: 'Angel',
+        text: 'And Heaven rejoiced. The King was coming to dwell among His people.',
+      },
+    ],
+    cue: 'Sing – Hark the Herald Angels Sing',
+  },
+  'room-faithful': {
+    lines: [
+      {
+        speaker: 'Angel (Narrator)',
+        text:
+          'Mary and Joseph obeyed the decree to travel to Bethlehem. Though weary and poor, they followed faithfully, trusting God\'s hand to guide them.',
+      },
+      {
+        speaker: 'Mary',
+        text:
+          'Luke 2:4-5 (NKJV)<br/>Joseph also went up from Galilee, out of the city of Nazareth, into Judea, to the city of David, which is called Bethlehem, because he was of the house and lineage of David, to be registered with Mary, his betrothed wife, who was with child.',
+      },
+      {
+        speaker: 'Angel (Narrator)',
+        text: 'Every step fulfilled prophecy. Every hardship was part of the plan. In the silence of the night, Heaven drew near.',
+      },
+    ],
+    cue: 'Sing – O Come All Ye Faithful',
+  },
+  'room-joy': {
+    lines: [
+      {
+        speaker: 'Angel (Narrator)',
+        text:
+          'And then it happened. The night sky opened. The glory of God shone bright, and we filled the heavens with praise.',
+      },
+      {
+        speaker: 'Shepherds',
+        text:
+          "Luke 2:9-11 (NKJV)<br/>And behold, an angel of the Lord stood before them, and the glory of the Lord shone around them, and they were greatly afraid. Then the angel said to them, 'Do not be afraid, for behold, I bring you good tidings of great joy which will be to all people. For there is born to you this day in the city of David a Savior, who is Christ the Lord.'",
+      },
+      {
+        speaker: 'Angels (all)',
+        text:
+          "Luke 2:14 (NKJV)<br/>'Glory to God in the highest, And on earth peace, goodwill toward men!'",
+      },
+      {
+        speaker: 'Angel (Narrator)',
+        text:
+          "The good news was not announced to kings or nobles, but to shepherds. God's message of peace came first to the humble.",
+      },
+    ],
+    cue: 'Sing – Joy to the World',
+  },
 };
 
 // DOM Elements
@@ -42,6 +138,7 @@ const codesHint = document.getElementById('codesHint')!;
 const roomStatusGrid = document.getElementById('roomStatusGrid')!;
 const noRoomsMessage = document.getElementById('noRoomsMessage')!;
 const roomControlsContainer = document.getElementById('roomControlsContainer')!;
+const roomNav = document.getElementById('roomNav')!;
 const globalPlayBtn = document.getElementById('globalPlayBtn')!;
 const globalPauseBtn = document.getElementById('globalPauseBtn')!;
 const globalStopBtn = document.getElementById('globalStopBtn')!;
@@ -93,6 +190,100 @@ function loadSavedCodes(): void {
   }
 }
 
+function renderScript(roomId: string): string {
+  const script = ROOM_SCRIPTS[roomId];
+  if (!script) return '';
+
+  const lines = script.lines
+    .map(
+      (line) => `
+        <div class="room-script__line">
+          <span class="room-script__speaker">${escapeHtml(line.speaker)}:</span>
+          <span class="room-script__text">${line.text}</span>
+        </div>
+      `
+    )
+    .join('');
+
+  return `
+    <div class="room-script">
+      <div class="room-script__header">Script</div>
+      <div class="room-script__body">${lines}</div>
+      <div class="room-script__cue">${escapeHtml(script.cue)}</div>
+    </div>
+  `;
+}
+
+// Render room navigation and wire up selection
+function renderRoomNav(roomIds: string[]): void {
+  if (!roomNav) return;
+
+  if (roomIds.length === 0) {
+    roomNav.innerHTML = '';
+    state.activeRoomId = null;
+    updateActiveRoomVisibility();
+    return;
+  }
+
+  if (!state.activeRoomId || !roomIds.includes(state.activeRoomId)) {
+    state.activeRoomId = roomIds[0] || null;
+  }
+
+  roomNav.innerHTML = roomIds
+    .map(
+      (roomId) => `
+        <button
+          class="room-nav__btn${roomId === state.activeRoomId ? ' room-nav__btn--active' : ''}"
+          data-room-id="${roomId}"
+          aria-pressed="${roomId === state.activeRoomId}"
+          type="button"
+        >
+          ${escapeHtml(ROOM_NAMES[roomId] || roomId)}
+        </button>
+      `
+    )
+    .join('');
+
+  const buttons = roomNav.querySelectorAll('.room-nav__btn');
+  buttons.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const roomId = btn.getAttribute('data-room-id');
+      if (roomId) {
+        setActiveRoom(roomId);
+      }
+    });
+  });
+
+  updateActiveRoomVisibility();
+}
+
+function setActiveRoom(roomId: string): void {
+  if (!roomId) return;
+  state.activeRoomId = roomId;
+  updateNavActiveState();
+  updateActiveRoomVisibility();
+}
+
+function updateNavActiveState(): void {
+  if (!roomNav) return;
+  const buttons = roomNav.querySelectorAll('.room-nav__btn');
+  buttons.forEach((btn) => {
+    const btnRoomId = btn.getAttribute('data-room-id');
+    const isActive = btnRoomId === state.activeRoomId;
+    btn.classList.toggle('room-nav__btn--active', isActive);
+    btn.setAttribute('aria-pressed', String(isActive));
+  });
+}
+
+function updateActiveRoomVisibility(): void {
+  const controls = roomControlsContainer.querySelectorAll('.room-control');
+  controls.forEach((control) => {
+    const roomId = control.getAttribute('data-room-id');
+    const isActive = roomId === state.activeRoomId;
+    control.classList.toggle('room-control--hidden', !isActive);
+  });
+}
+
 // Connect to a code
 function connectToCode(code: string): void {
   syncCodeInput.value = code;
@@ -140,7 +331,7 @@ async function connect(): Promise<void> {
 
     // Update UI
     updateConnectionUI();
-    
+
     // Fetch all initial room statuses on connect (will be empty if rooms haven't sent status yet)
     // Rooms will send status on page load, so this catches any that are already connected
     syncManager.getAllRoomStatuses().then(statuses => {
@@ -148,7 +339,7 @@ async function connect(): Promise<void> {
         updateRoomStatusFromListener(status);
       });
     });
-    
+
     // Listen for real-time status updates from rooms (push instead of poll)
     // This catches new rooms as they connect and send their initial status
     syncManager.onStatus((status) => {
@@ -226,7 +417,7 @@ function renderRoomLinks(): void {
 // Update room status from real-time Firebase listener (called when rooms push updates)
 function updateRoomStatusFromListener(roomStatus: RoomState): void {
   const roomControl = roomControlsContainer.querySelector(`[data-room-id="${roomStatus.roomId}"]`) as HTMLElement;
-  
+
   if (!roomControl) {
     // Room not yet in UI, fetch all statuses to build initial list
     if (state.syncManager) {
@@ -247,13 +438,13 @@ function updateRoomStatusFromListener(roomStatus: RoomState): void {
   const wasExpanded = roomControl.classList.contains('room-control--expanded');
   roomControl.className = `room-control room-control--${borderColor}${wasExpanded ? ' room-control--expanded' : ''}`;
   roomControl.setAttribute('data-lyrics-open', String(wasExpanded));
-  
+
   // Update play indicator (hide when stopped)
   const playIndicator = roomControl.querySelector('.play-indicator') as HTMLElement;
   if (playIndicator) {
     playIndicator.style.display = roomStatus.isPlaying ? 'block' : 'none';
   }
-  
+
   // Update status badge
   const statusBadge = roomControl.querySelector('.status-badge') as HTMLElement;
   if (statusBadge) {
@@ -274,7 +465,7 @@ function updateRoomStatusFromListener(roomStatus: RoomState): void {
     statusBadge.className = `status-badge status-badge--${badgeClass}`;
     statusBadge.textContent = badgeText;
   }
-  
+
   // Update time display data attributes
   const timeDisplay = roomControl.querySelector('.time-display') as HTMLElement;
   if (timeDisplay) {
@@ -311,7 +502,7 @@ function updateRoomStatusFromListener(roomStatus: RoomState): void {
     const isOpen = roomControl.getAttribute('data-lyrics-open') === 'true';
     toggleBtn.textContent = hasSong ? (isOpen ? 'Hide Lyrics' : 'Show Lyrics') : 'Show Lyrics';
   }
-  
+
   // Update lyrics display based on play state, using timestamp-based time when available
   let effectiveCurrentTime = roomStatus.currentTime;
   if (
@@ -334,47 +525,41 @@ function updateRoomStatusFromListener(roomStatus: RoomState): void {
 // Poll for room status updates (only on initial connect to load rooms)
 function startStatusPolling(): void {
   if (!state.isConnected || !state.syncManager) return;
-  
+
   // Single fetch to populate the initial room list
   state.syncManager.getAllRoomStatuses().then(statuses => {
     updateRoomStatus(statuses);
   });
 }
 
-// Track which rooms have been added (persists across status updates)
-const addedRooms = new Set<string>();
-
 // Update room status display (only updates status, not controls structure)
 function updateRoomStatus(roomStatuses: Record<string, RoomState>): void {
   const activeRooms = Object.values(roomStatuses);
+  activeRooms.forEach(room => addedRooms.add(room.roomId));
 
-  // Only add new rooms, never remove them
-  const roomOrder = ['room-emmanuel', 'room-twilight', 'room-faithful', 'room-joy'];
-  
-  // Find new rooms to add
-  const newRooms = activeRooms.filter(room => !addedRooms.has(room.roomId));
-  
-  if (newRooms.length === 0 && addedRooms.size === 0) {
+  const sortedRooms = ROOM_ORDER
+    .filter(roomId => addedRooms.has(roomId))
+    .map(roomId => {
+      return roomStatuses[roomId] || {
+        roomId,
+        isActive: false,
+        isPlaying: false,
+        currentTime: 0,
+        isActivated: false,
+        lastUpdate: 0
+      };
+    });
+
+  if (sortedRooms.length === 0) {
     noRoomsMessage.style.display = 'block';
+    roomControlsContainer.innerHTML = '';
+    roomNav.innerHTML = '';
+    state.activeRoomId = null;
     return;
   }
 
   noRoomsMessage.style.display = 'none';
-  roomStatusGrid.innerHTML = '';
-
-  // Build list of rooms that should be visible (already added or new)
-  const sortedRooms = roomOrder
-    .map(roomId => {
-      if (addedRooms.has(roomId)) {
-        return roomStatuses[roomId] || null;
-      }
-      const room = activeRooms.find(r => r.roomId === roomId);
-      if (room) {
-        addedRooms.add(roomId);
-      }
-      return room || null;
-    })
-    .filter((room): room is RoomState => room !== null);
+  renderRoomNav(sortedRooms.map(room => room.roomId));
 
   // Preserve existing per-room UI state (lyrics toggle)
   const existingState: Record<string, { open: boolean }> = {};
@@ -387,7 +572,6 @@ function updateRoomStatus(roomStatuses: Record<string, RoomState>): void {
     }
   });
 
-  // Build the HTML only once (on first load or room list change)
   // Rebuild if number of rooms changed (new room added) or container is empty
   const currentRoomCount = roomControlsContainer.children.length;
   if (currentRoomCount === 0 || currentRoomCount !== sortedRooms.length) {
@@ -396,32 +580,41 @@ function updateRoomStatus(roomStatuses: Record<string, RoomState>): void {
         (room) => {
           // Determine border color: green = playing, yellow = paused, red = stopped
           let borderColor = 'yellow';
-          if (room.isPlaying) {
+          if (room.isActive && room.isPlaying) {
             borderColor = 'green';
-          } else if (room.currentTime === 0 && !room.isPlaying) {
+          } else if (room.isActive && room.currentTime === 0 && !room.isPlaying) {
             borderColor = 'red';
+          } else if (!room.isActive) {
+            borderColor = 'gray'; // offline
           }
-          
+
           // Calculate current time locally if playing (reduces Firebase reads)
           let currentTime = room.currentTime;
-          if (room.isPlaying && room.playStartTime && room.playStartPosition !== undefined) {
+          if (room.isActive && room.isPlaying && room.playStartTime && room.playStartPosition !== undefined) {
             const elapsed = (Date.now() - room.playStartTime) / 1000;
             currentTime = room.playStartPosition + elapsed;
           }
-          
+
           const wasOpen = existingState[room.roomId]?.open || false;
           const expandedClass = wasOpen ? ' room-control--expanded' : '';
+          const isActiveRoom = room.roomId === state.activeRoomId;
+          const hiddenClass = isActiveRoom ? '' : ' room-control--hidden';
           const toggleLabel = wasOpen ? 'Hide Lyrics' : 'Show Lyrics';
+          const scriptHtml = renderScript(room.roomId);
 
           return `
-    <div class="room-control room-control--${borderColor}${expandedClass}" data-room-id="${room.roomId}" data-song-id="${room.songId || ''}" data-lyrics-open="${wasOpen}">
-      <span class="play-indicator" style="display: ${room.isPlaying ? 'block' : 'none'}">▶</span>
+    <div class="room-control room-control--${borderColor}${expandedClass}${hiddenClass}" data-room-id="${room.roomId}" data-song-id="${room.songId || ''}" data-lyrics-open="${wasOpen}">
+      <span class="play-indicator" style="display: ${room.isActive && room.isPlaying ? 'block' : 'none'}">▶</span>
       <div class="room-control-header">
-        <h4>${escapeHtml(ROOM_NAMES[room.roomId] || room.roomId)}</h4>
+        <div class="room-control-title">
+          <h4>${escapeHtml(ROOM_NAMES[room.roomId] || room.roomId)}</h4>
+          <button class="btn btn-small btn-danger" onclick="removeRoom('${room.roomId}')" title="Remove from list">✕</button>
+        </div>
         <div class="room-status-inline">
           <span class="status-badge status-badge--${room.isActive ? 'active' : 'inactive'}">
-            ${room.isActive ? 'Active' : 'Disconnected'}
+            ${room.isActive ? 'Connected' : 'Disconnected'}
           </span>
+          ${!room.isActive ? '<span class="status-info" style="color: #ff9800;">Refresh room page to reconnect</span>' : ''}
           <span class="status-info time-display" data-playing="${room.isPlaying}" data-start-time="${room.playStartTime || 0}" data-start-pos="${room.playStartPosition || 0}">Time: ${formatTime(currentTime)}</span>
           ${room.isActivated ? '<span class="status-info">✓ Activated</span>' : ''}
         </div>
@@ -434,6 +627,7 @@ function updateRoomStatus(roomStatuses: Record<string, RoomState>): void {
         <button class="btn btn-small btn-info" onclick="sendCommand('activate', '${room.roomId}')">Activate</button>
         <button class="btn btn-small btn-outline" onclick="sendCommand('reset', '${room.roomId}')">Reset</button>
       </div>
+      ${scriptHtml}
       <div class="room-lyrics-display">
         <div class="lyrics-content"></div>
       </div>
@@ -442,6 +636,8 @@ function updateRoomStatus(roomStatuses: Record<string, RoomState>): void {
         }
       )
       .join('');
+
+    updateActiveRoomVisibility();
   } else {
     // Update only the status attributes and border colors without rebuilding
     sortedRooms.forEach((room) => {
@@ -455,24 +651,26 @@ function updateRoomStatus(roomStatuses: Record<string, RoomState>): void {
           borderColor = 'red';
         }
         const wasExpanded = roomControl.classList.contains('room-control--expanded');
+        const wasHidden = roomControl.classList.contains('room-control--hidden');
         const expandedClass = wasExpanded ? ' room-control--expanded' : '';
-        roomControl.className = `room-control room-control--${borderColor}${expandedClass}`;
+        const hiddenClass = wasHidden ? ' room-control--hidden' : '';
+        roomControl.className = `room-control room-control--${borderColor}${expandedClass}${hiddenClass}`;
         roomControl.setAttribute('data-lyrics-open', String(wasExpanded));
         roomControl.setAttribute('data-song-id', room.songId || '');
-        
+
         // Update play indicator visibility
         const playIndicator = roomControl.querySelector('.play-indicator') as HTMLElement;
         if (playIndicator) {
           playIndicator.style.display = room.isPlaying ? 'block' : 'none';
         }
-        
+
         // Update status badge
         const statusBadge = roomControl.querySelector('.status-badge') as HTMLElement;
         if (statusBadge) {
           statusBadge.className = `status-badge status-badge--${room.isActive ? 'active' : 'inactive'}`;
           statusBadge.textContent = room.isActive ? 'Active' : 'Disconnected';
         }
-        
+
         // Update time display data attributes (local timer will use these)
         const timeDisplay = roomControl.querySelector('.time-display') as HTMLElement;
         if (timeDisplay) {
@@ -486,7 +684,7 @@ function updateRoomStatus(roomStatuses: Record<string, RoomState>): void {
             timeDisplay.setAttribute('data-playing', String(room.isPlaying));
           }
         }
-        
+
         // Update activated status
         const statusInline = roomControl.querySelector('.room-status-inline');
         if (statusInline) {
@@ -495,7 +693,7 @@ function updateRoomStatus(roomStatuses: Record<string, RoomState>): void {
           if (existingActivated && existingActivated.textContent?.includes('✓')) {
             existingActivated.remove();
           }
-          
+
           // Add new one if activated
           if (room.isActivated) {
             const span = document.createElement('span');
@@ -504,7 +702,7 @@ function updateRoomStatus(roomStatuses: Record<string, RoomState>): void {
             statusInline.appendChild(span);
           }
         }
-        
+
         // Update toggle button text/state based on song availability
         const toggleBtn = roomControl.querySelector('.toggle-lyrics-btn') as HTMLButtonElement | null;
         if (toggleBtn) {
@@ -515,6 +713,9 @@ function updateRoomStatus(roomStatuses: Record<string, RoomState>): void {
         }
       }
     });
+
+    updateNavActiveState();
+    updateActiveRoomVisibility();
   }
 }
 
@@ -534,11 +735,11 @@ function seekToTime(roomId: string, seekTime: number): void {
   if (!state.syncManager) return;
 
   // Send timestamp so room can account for network delay
-  state.syncManager.sendCommand('seek', roomId, { 
+  state.syncManager.sendCommand('seek', roomId, {
     time: seekTime,
     commandTimestamp: Date.now()
   });
-  
+
   console.log(`[Control] Seeking ${roomId} to ${seekTime}s`);
 }
 
@@ -608,10 +809,10 @@ async function updateRoomLyricsDisplay(roomId: string, songId: string | undefine
   }
 
   if (activeSongId) {
-     // Check if this is a different song than what's currently loaded
-     const currentSongId = roomControl.getAttribute('data-current-song-id');
-     const needsRender = currentSongId !== activeSongId || lyricsContent.children.length === 0;
-    
+    // Check if this is a different song than what's currently loaded
+    const currentSongId = roomControl.getAttribute('data-current-song-id');
+    const needsRender = currentSongId !== activeSongId || lyricsContent.children.length === 0;
+
     // Load lyrics if not cached
     if (!state.lyricsCache[activeSongId]) {
       try {
@@ -638,7 +839,7 @@ async function updateRoomLyricsDisplay(roomId: string, songId: string | undefine
             return `<div class="lyrics-line" data-start="${start}" data-index="${idx}">${escapeHtml(text)}</div>`;
           })
           .join('');
-        
+
         // Add click handlers to seek to that lyric time
         const lyricLines = lyricsContent.querySelectorAll('.lyrics-line') as NodeListOf<HTMLElement>;
         lyricLines.forEach((line) => {
@@ -648,7 +849,7 @@ async function updateRoomLyricsDisplay(roomId: string, songId: string | undefine
           });
         });
       }
-      
+
       // Only highlight when user toggles open; no auto expand/collapse
       if (isOpen) {
         updateLyricsHighlight(roomId, currentTime);
@@ -666,7 +867,7 @@ function updateLyricsHighlight(roomId: string, currentTime: number): void {
 
   const lines = roomControl.querySelectorAll('.lyrics-line') as NodeListOf<HTMLElement>;
   if (lines.length === 0) return;
-  
+
   let activeIdx = -1;
 
   // Find the current lyric line
@@ -696,13 +897,13 @@ function updateLocalTimers(): void {
     const isPlaying = display.getAttribute('data-playing') === 'true';
     const startTime = Number(display.getAttribute('data-start-time'));
     const startPos = Number(display.getAttribute('data-start-pos'));
-    
+
     // Only update if actually playing with a valid start time
     if (isPlaying && startTime > 0 && startPos >= 0) {
       const elapsed = (Date.now() - startTime) / 1000;
       const currentTime = startPos + elapsed;
       display.textContent = `Time: ${formatTime(currentTime)}`;
-      
+
       // Also update lyrics highlight for this room
       const roomControl = display.closest('.room-control');
       if (roomControl) {
@@ -813,6 +1014,24 @@ function toggleMenu(): void {
   }
 }
 
+// Remove a room card from view (will return on next status refresh)
+function removeRoom(roomId: string): void {
+  if (confirm(`Remove ${ROOM_NAMES[roomId] || roomId} from the list?`)) {
+    addedRooms.delete(roomId);
+    const roomControl = roomControlsContainer.querySelector(`[data-room-id="${roomId}"]`);
+    if (roomControl) {
+      roomControl.remove();
+    }
+
+    const remaining = Array.from(addedRooms);
+    renderRoomNav(remaining);
+    updateActiveRoomVisibility();
+    if (!remaining.length) {
+      noRoomsMessage.style.display = 'block';
+    }
+  }
+}
+
 menuToggleBtn.addEventListener('click', toggleMenu);
 menuOverlay.addEventListener('click', toggleMenu);
 
@@ -820,6 +1039,8 @@ menuOverlay.addEventListener('click', toggleMenu);
 (window as any).sendCommand = sendCommand;
 (window as any).toggleLyrics = toggleLyrics;
 (window as any).seekToTime = seekToTime;
+(window as any).removeRoom = removeRoom;
+(window as any).setActiveRoom = setActiveRoom;
 
 // Initialize UI
 updateConnectionUI();

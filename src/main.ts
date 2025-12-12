@@ -80,7 +80,7 @@ const initSync = async (): Promise<void> => {
         songId: songId
       });
       console.log('[Sync] Sent initial reset status');
-      
+
       // Make sendStatusUpdate available globally for command handler
       (window as any).sendStatusUpdate = sendStatusUpdate;
 
@@ -257,4 +257,22 @@ initSync();
 
 // Initialize the room
 initializeRoom();
+
+// Script toggle functionality
+const scriptToggle = document.querySelector('.script-toggle') as HTMLElement | null;
+const scriptContent = document.querySelector('.script-content') as HTMLElement | null;
+
+if (scriptToggle && scriptContent) {
+  // Start with script collapsed (hidden)
+  scriptContent.style.display = 'none';
+
+  scriptToggle.addEventListener('click', () => {
+    const isHidden = scriptContent!.style.display === 'none';
+    scriptContent!.style.display = isHidden ? 'block' : 'none';
+    // Rotate arrow indicator
+    const arrow = scriptToggle.textContent?.charAt(0) === '▼' ? '▶' : '▼';
+    const label = scriptToggle.textContent?.substring(2) || 'Script';
+    scriptToggle.textContent = arrow + ' ' + label;
+  });
+}
 

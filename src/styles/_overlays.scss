@@ -9,6 +9,114 @@
   pointer-events: none;
 }
 
+// Script section for narrative/character dialogue
+.script-section {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  max-width: 90vw;
+  max-height: 40vh;
+  background: rgba(0, 0, 0, 0.75);
+  border-radius: 8px;
+  backdrop-filter: blur(2px);
+  z-index: 10;
+  overflow: hidden;
+
+  .script-toggle {
+    width: 100%;
+    padding: 12px 16px;
+    background: rgba(0, 0, 0, 0.5);
+    color: rgba(255, 255, 255, 0.9);
+    border: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s ease;
+    text-align: left;
+
+    &:hover {
+      background: rgba(0, 0, 0, 0.7);
+    }
+  }
+
+  .script-content {
+    padding: 14px 16px;
+    max-height: calc(40vh - 45px);
+    overflow-y: auto;
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 13px;
+    line-height: 1.5;
+
+    // Scrollbar styling
+    &::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    &::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 3px;
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.3);
+      }
+    }
+  }
+
+  .script-line {
+    margin-bottom: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .script-character {
+    color: #a8d8ff;
+    font-weight: 600;
+    font-size: 13px;
+  }
+
+  .script-text {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 12px;
+
+    br {
+      display: block;
+      content: "";
+      margin-bottom: 4px;
+    }
+  }
+
+  .script-cue {
+    color: #ffd700;
+    font-weight: 600;
+    font-style: italic;
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid rgba(255, 215, 0, 0.2);
+    font-size: 12px;
+  }
+}
+
+// Hide script section until activated
+body:not(.activated) {
+  .script-section {
+    opacity: 0 !important;
+    pointer-events: none !important;
+  }
+}
+
+body.activated {
+  .script-section {
+    transition: opacity 0.35s ease;
+    pointer-events: auto;
+  }
+}
+
 // Hide interactive/animated elements until first user click
 // Hard-hide interactive elements until activation (no initial fade flicker)
 body:not(.activated) {
@@ -106,7 +214,7 @@ body.activated {
     opacity 0.8s ease;
   pointer-events: none;
   resize: both;
-  overflow: auto;
+  overflow: hidden;
 
   &.show {
     opacity: 1;
