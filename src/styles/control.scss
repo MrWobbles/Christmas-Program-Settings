@@ -239,6 +239,33 @@ body {
     border-radius: 8px;
   }
 
+  .room-nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 12px;
+
+    &__btn {
+      padding: 8px 12px;
+      border: 1px solid #667eea;
+      background: white;
+      color: #3a3f72;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+
+      &:hover {
+        background: #eef1ff;
+      }
+
+      &--active {
+        background: #667eea;
+        color: white;
+        box-shadow: 0 4px 10px rgba(102, 126, 234, 0.25);
+      }
+    }
+  }
+
   .control-buttons {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
@@ -260,6 +287,10 @@ body {
       width: 100%;
       position: relative;
       transition: all 0.3s ease;
+
+      &--hidden {
+        display: none;
+      }
 
       &--green {
         border-color: #4caf50;
@@ -287,6 +318,12 @@ body {
 
       .room-control-header {
         margin-bottom: 12px;
+        position: relative;
+      }
+
+      .room-control-title {
+        position: relative;
+        display: block;
       }
 
       h4 {
@@ -294,6 +331,14 @@ body {
         margin-bottom: 8px;
         font-size: 1rem;
         font-weight: 600;
+        margin-top: 0;
+      }
+
+      .room-control-title .btn-danger {
+        position: absolute;
+        top: -8px;
+        right: -8px;
+        padding: 4px 8px;
       }
 
       .room-status-inline {
@@ -343,11 +388,63 @@ body {
         flex-wrap: wrap;
         gap: 8px;
       }
+
+      .room-script {
+        margin-top: 12px;
+        background: #f7f9ff;
+        border: 1px solid #dde3ff;
+        border-radius: 8px;
+        padding: 10px 12px;
+        color: #2d2f3a;
+
+        &__header {
+          font-weight: 700;
+          font-size: 0.9rem;
+          margin-bottom: 6px;
+          color: #4a56a6;
+        }
+
+        &__body {
+          display: flex;
+          flex-direction: column;
+          gap: 6px;
+        }
+
+        &__line {
+          display: flex;
+          gap: 6px;
+          align-items: baseline;
+        }
+
+        &__speaker {
+          font-weight: 600;
+          color: #1f265c;
+          white-space: nowrap;
+        }
+
+        &__text {
+          color: #2d2f3a;
+          font-size: 0.9rem;
+
+          br {
+            display: block;
+            margin-bottom: 2px;
+          }
+        }
+
+        &__cue {
+          margin-top: 8px;
+          font-weight: 700;
+          color: #c07a00;
+          font-size: 0.9rem;
+        }
+      }
     }
   }
 
   @keyframes pulse {
-    0%, 100% {
+    0%,
+    100% {
       opacity: 1;
       transform: scale(1);
     }
@@ -994,4 +1091,3 @@ body {
     padding: 8px 12px;
   }
 }
-
