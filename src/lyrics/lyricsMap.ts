@@ -18,6 +18,10 @@ export const lyricsMap: Record<string, () => Promise<TimedLyric[]>> = {
     const mod = await import('./joy-to-the-world');
     return mod.default;
   },
+  'silent-night': async () => {
+    const mod = await import('./silent-night');
+    return mod.default;
+  },
 };
 
 export async function getLyrics(songId: string): Promise<TimedLyric[] | null> {

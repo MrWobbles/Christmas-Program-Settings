@@ -17,6 +17,7 @@ export default defineConfig({
       resolve(__dirname, 'src/html/room2.html'),
       resolve(__dirname, 'src/html/room3.html'),
       resolve(__dirname, 'src/html/room4.html'),
+      resolve(__dirname, 'src/html/room5.html'),
       resolve(__dirname, 'src/html/control.html'),
       resolve(__dirname, 'src/html/timing.html'),
       resolve(__dirname, 'src/html/index.html')
@@ -31,6 +32,7 @@ export default defineConfig({
         room2: resolve(__dirname, 'src/html/room2.html'),
         room3: resolve(__dirname, 'src/html/room3.html'),
         room4: resolve(__dirname, 'src/html/room4.html'),
+        room5: resolve(__dirname, 'src/html/room5.html'),
         control: resolve(__dirname, 'src/html/control.html'),
         timing: resolve(__dirname, 'src/html/timing.html'),
         index: resolve(__dirname, 'src/html/index.html')

@@ -53,6 +53,7 @@ const existingLyrics = {
   'o-come-all-ye-faithful': 'O Come All Ye Faithful',
   'o-come-o-come-emmanuel': 'O Come O Come Emmanuel',
   'joy-to-the-world': 'Joy to the World',
+  'silent-night': 'Silent Night',
 };
 
 // List available MP3 files
@@ -62,6 +63,7 @@ function loadAudioFiles(): void {
     { path: './audio/Joy to the World.mp3', name: 'Joy to the World' },
     { path: './audio/O Come All Ye Faithful.mp3', name: 'O Come All Ye Faithful' },
     { path: './audio/O Come O Come Emmanuel.mp3', name: 'O Come O Come Emmanuel' },
+    { path: './audio/Silent Night.mp3', name: 'Silent Night' },
   ];
 
   if (mp3Files.length === 0) {
@@ -140,6 +142,8 @@ async function loadExistingLyrics(songId: string): Promise<void> {
       lyrics = (await import('./lyrics/o-come-o-come-emmanuel')).default;
     } else if (songId === 'joy-to-the-world') {
       lyrics = (await import('./lyrics/joy-to-the-world')).default;
+    } else if (songId === 'silent-night') {
+      lyrics = (await import('./lyrics/silent-night')).default;
     }
 
     // Convert to our format

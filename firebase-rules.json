@@ -1,0 +1,39 @@
+{
+  "rules": {
+    "commands": {
+      "$code": {
+        ".read": true,
+        ".write": true,
+        "$commandId": {
+          ".validate": "newData.hasChildren(['id', 'code', 'command', 'timestamp']) && newData.child('code').val().matches(/^[A-Z0-9-]{3,20}$/) && newData.child('timestamp').val() > now - 60000",
+          "id": { ".validate": "newData.isString()" },
+          "code": { ".validate": "newData.isString()" },
+          "command": { ".validate": "newData.val().matches(/^(play|pause|seek|activate|stop|reset)$/)" },
+          "timestamp": { ".validate": "newData.isNumber()" },
+          "targetRoom": { ".validate": "newData.isString() || !newData.exists()" },
+          "data": { ".validate": "newData.isString() || !newData.exists()" }
+        }
+      }
+    },
+    "status": {
+      "$code": {
+        ".read": true,
+        ".write": true,
+        "$roomId": {
+          ".validate": "newData.hasChildren(['roomId', 'isActive', 'lastUpdate']) && newData.child('lastUpdate').val() > now - 120000",
+          "roomId": { ".validate": "newData.isString()" },
+          "isActive": { ".validate": "newData.isBoolean()" },
+          "isPlaying": { ".validate": "newData.isBoolean() || !newData.exists()" },
+          "currentTime": { ".validate": "newData.isNumber() || !newData.exists()" },
+          "isActivated": { ".validate": "newData.isBoolean() || !newData.exists()" },
+          "lastUpdate": { ".validate": "newData.isNumber()" },
+          "playStartTime": { ".validate": "newData.isNumber() || !newData.exists()" },
+          "playStartPosition": { ".validate": "newData.isNumber() || !newData.exists()" },
+          "songId": { ".validate": "newData.isString() || !newData.exists()" }
+        }
+      }
+    },
+    ".read": false,
+    ".write": false
+  }
+}

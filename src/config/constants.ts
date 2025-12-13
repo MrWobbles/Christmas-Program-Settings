@@ -8,6 +8,7 @@ export const ROOMS = {
   TWILIGHT: 'room-twilight',
   FAITHFUL: 'room-faithful',
   JOY: 'room-joy',
+  SILENT: 'room-silent',
 } as const;
 
 export const ROOM_NAMES: Record<string, string> = {
@@ -15,6 +16,7 @@ export const ROOM_NAMES: Record<string, string> = {
   [ROOMS.TWILIGHT]: 'Room 2: Twilight',
   [ROOMS.FAITHFUL]: 'Room 3: Faithful',
   [ROOMS.JOY]: 'Room 4: Joy',
+  [ROOMS.SILENT]: 'Room 5: Silent Night',
 };
 
 export const ROOM_FILES: Record<string, string> = {
@@ -22,6 +24,7 @@ export const ROOM_FILES: Record<string, string> = {
   [ROOMS.TWILIGHT]: 'room2.html',
   [ROOMS.FAITHFUL]: 'room3.html',
   [ROOMS.JOY]: 'room4.html',
+  [ROOMS.SILENT]: 'room5.html',
 };
 
 // localStorage Keys

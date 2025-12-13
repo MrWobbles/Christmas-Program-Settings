@@ -21,7 +21,7 @@ const state: ControlState = {
   activeRoomId: null,
 };
 
-const ROOM_ORDER = [ROOMS.EMMANUEL, ROOMS.TWILIGHT, ROOMS.FAITHFUL, ROOMS.JOY];
+const ROOM_ORDER = [ROOMS.EMMANUEL, ROOMS.TWILIGHT, ROOMS.FAITHFUL, ROOMS.JOY, ROOMS.SILENT];
 const addedRooms = new Set<string>();
 
 const ROOM_SCRIPTS: Record<string, { lines: { speaker: string; text: string }[]; cue: string }> = {
@@ -112,6 +112,116 @@ const ROOM_SCRIPTS: Record<string, { lines: { speaker: string; text: string }[];
       },
     ],
     cue: 'Sing – Joy to the World',
+  },
+  'room-silent': {
+    lines: [
+      {
+        speaker: 'Angel (Narrator)',
+        text:
+          'We\'ve been watching this story unfold for a very long time. Centuries, actually. And tonight, this holy, silent night, is the moment everything changes.',
+      },
+      {
+        speaker: 'Angel (Narrator)',
+        text:
+          'It started with a promise. Long ago, the prophet Isaiah stood before God\'s people and spoke words that echoed through the ages: "For unto us a Child is born, unto us a Son is given... and His name will be called Wonderful Counselor, Mighty God, Everlasting Father, Prince of Peace."',
+      },
+      {
+        speaker: 'Angel (Narrator)',
+        text:
+          'For generations, people waited. They wondered. They hoped. When will He come? How will we know Him? But God\'s timing is perfect, and His plan was more beautiful than anyone could have imagined.',
+      },
+      {
+        speaker: 'Angel (Narrator)',
+        text:
+          'Then came the day Gabriel was sent. I remember it well. The excitement in heaven was overwhelming. He appeared to a young woman named Mary in the little town of Nazareth. An ordinary girl, going about her ordinary day, when suddenly an angel of the Lord stands before her.',
+      },
+      {
+        speaker: 'Angel (Narrator)',
+        text:
+          'Gabriel said, "Do not be afraid, Mary, for you have found favor with God. You will conceive and give birth to a son, and you are to call Him Jesus. He will be great and will be called the Son of the Most High."',
+      },
+      {
+        speaker: 'Angel (Narrator)',
+        text:
+          'And Mary, brave, faithful Mary, she didn\'t run. She didn\'t hide. She simply said, "I am the Lord\'s servant. May your word to me be fulfilled." In that moment, heaven rejoiced. The plan was set in motion.',
+      },
+      {
+        speaker: 'Angel (Narrator)',
+        text:
+          'Months passed. Mary and Joseph faced whispers, faced judgment, faced uncertainty. But they trusted God. When Caesar decreed that everyone must return to their hometown for a census, they didn\'t complain. They simply obeyed.',
+      },
+      {
+        speaker: 'Angel (Narrator)',
+        text:
+          'Mary was nine months pregnant, riding on a donkey for 90 miles from Nazareth to Bethlehem. The journey took days. Every bump, every rocky path, but she never lost faith. Joseph walked beside her, protective and faithful, trusting that God was in control.',
+      },
+      {
+        speaker: 'Angel (Narrator)',
+        text:
+          'When they finally arrived in Bethlehem, the town was bursting with travelers. Every inn was full. Every room was taken. Door after door closed in their faces. "No room. No room. No room." Joseph\'s heart must have sunk with each rejection.',
+      },
+      {
+        speaker: 'Angel (Narrator)',
+        text:
+          'Finally, someone offered them a stable. Not a guest room. Not even a servant\'s quarters. A stable, where animals ate and slept. The smell of hay and livestock. The cold night air seeping through the cracks. This is where the King of Kings would make His entrance.',
+      },
+      {
+        speaker: 'Angel (Narrator)',
+        text:
+          'And then it happened. Luke 2:6-7 says it simply: "While they were there, the days were completed for her to be delivered. And she brought forth her firstborn Son, and wrapped Him in swaddling cloths, and laid Him in a manger, because there was no room for them in the inn."',
+      },
+      {
+        speaker: 'Angel (Narrator)',
+        text:
+          'But those simple words don\'t capture everything. The moment that baby cried, that first breath, that first sound, creation itself held still. The stars shone brighter. The animals grew quiet. Even we angels paused in wonder.',
+      },
+      {
+        speaker: 'Angel (Narrator)',
+        text:
+          'Meanwhile, just outside Bethlehem, shepherds were watching their flocks. Ordinary shepherds, doing their ordinary job on what they thought was an ordinary night. And then the glory of the Lord shone around them! We couldn\'t contain ourselves!',
+      },
+      {
+        speaker: 'Angel (Narrator)',
+        text:
+          '"Do not be afraid!" we proclaimed. "We bring you good news that will cause great joy for all the people! Today in the town of David a Savior has been born to you; He is the Messiah, the Lord!" And then suddenly the whole host of heaven appeared, singing "Glory to God in the highest heaven, and on earth peace to those on whom His favor rests!"',
+      },
+      {
+        speaker: 'Angel (Narrator)',
+        text:
+          'Those shepherds ran. They RAN to see this thing that had happened. And when they found Mary and Joseph and the baby lying in that manger, they fell to their knees. They understood. This tiny, vulnerable infant was the answer to every prayer, every prophecy, every promise.',
+      },
+      {
+        speaker: 'Angel (Narrator)',
+        text:
+          'God didn\'t send Jesus to a palace. He didn\'t announce His birth to kings and rulers first. He came in humility, born among the lowly, announced to shepherds. Because this message of hope, this gift of salvation, it\'s for everyone.',
+      },
+      {
+        speaker: 'Angel (Narrator)',
+        text:
+          'Matthew 1:23 tells us: "Behold, the virgin shall be with child, and bear a Son, and they shall call His name Immanuel," which means "God with us." Not God far away. Not God unreachable. God WITH us. In the flesh. In the mess. In the stable.',
+      },
+      {
+        speaker: 'Angel (Narrator)',
+        text:
+          'That silent night, holy night, was the hinge of history. Everything before pointed to this moment. Everything after flows from it. The Word became flesh. The Light entered the darkness. Hope was born. Peace arrived. Love came down.',
+      },
+      {
+        speaker: 'Angel (Narrator)',
+        text:
+          'From Isaiah\'s ancient prophecy to Gabriel\'s announcement, from Mary\'s faithful "yes" to that difficult journey to Bethlehem, from our joyful proclamation to the shepherds to this precious baby wrapped in cloths and lying in a manger, this is the Christmas story.',
+      },
+      {
+        speaker: 'Angel (Narrator)',
+        text:
+          'This is the story of a God who loved the world so much that He didn\'t stay distant. He came near. He came as a baby. Vulnerable. Dependent. Fully human. And in doing so, He opened the way for all of us to come home.',
+      },
+      {
+        speaker: 'Angel (Narrator)',
+        text:
+          'So on this silent night, in this holy moment, we remember: All is calm. All is bright. The Prince of Peace has come. Emmanuel. God is with us. And He always will be.',
+      },
+    ],
+    cue: 'Sing – Silent Night',
   },
 };
 
@@ -403,7 +513,9 @@ function renderRoomLinks(): void {
   const basePath = pathParts.length > 0 ? '/' + pathParts.join('/') + '/' : '/';
   
   const origin = window.location.origin.replace(/\/$/, '');
-  const items = Object.entries(ROOM_FILES)
+  const items = ROOM_ORDER
+    .map(roomId => [roomId, ROOM_FILES[roomId]] as const)
+    .filter(([, fileName]) => fileName) // Only include rooms that have files
     .map(([roomId, fileName]) => {
       const url = `${origin}${basePath}${fileName}?sync-code=${encodeURIComponent(state.currentCode)}`;
       return `

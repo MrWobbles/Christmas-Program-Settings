@@ -97,6 +97,7 @@ function getRoomId(): string {
   if (classList.includes('room-emmanuel')) return 'room-emmanuel';
   if (classList.includes('room-faithful')) return 'room-faithful';
   if (classList.includes('room-joy')) return 'room-joy';
+  if (classList.includes('room-silent')) return 'room-silent';
   return 'unknown';
 }
 
@@ -184,6 +185,7 @@ document.body.addEventListener('click', (e) => {
     'joy-to-the-world': () => import('./lyrics/joy-to-the-world'),
     'o-come-o-come-emmanuel': () => import('./lyrics/o-come-o-come-emmanuel'),
     'o-come-all-ye-faithful': () => import('./lyrics/o-come-all-ye-faithful'),
+    'silent-night': () => import('./lyrics/silent-night'),
   };
 
   const loader = songLoaders[songKey] || songLoaders['hark-herald-angels'];
@@ -246,6 +248,9 @@ async function initializeRoom() {
     } else if (roomClass.includes('room-joy')) {
       const { initRoom4 } = await import('./room/room-joy');
       initRoom4(canvas as HTMLCanvasElement, ctx as CanvasRenderingContext2D, lyricsManager);
+    } else if (roomClass.includes('room-silent')) {
+      const { initRoom5 } = await import('./room/room-silent');
+      initRoom5(canvas as HTMLCanvasElement, ctx as CanvasRenderingContext2D, lyricsManager);
     }
   } catch (err) {
     console.error('Failed to initialize room:', err);
