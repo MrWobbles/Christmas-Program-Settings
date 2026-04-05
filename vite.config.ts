@@ -8,7 +8,28 @@ export default defineConfig({
   base: './',
   publicDir: 'src/assets',
   server: {
-    open: 'src/html/control.html'
+    host: '127.0.0.1',
+    port: 5173,
+    strictPort: true,
+    open: 'src/html/spotify.html',
+    proxy: {
+      '/caldav-proxy': {
+        target: 'https://caldav.icloud.com',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/caldav-proxy/, ''),
+        configure: (proxy) => {
+          proxy.on('proxyReq', (proxyReq) => {
+            // Forward the authorization header
+            proxyReq.setHeader('Host', 'caldav.icloud.com');
+          });
+        }
+      }
+    }
+  },
+  preview: {
+    host: '127.0.0.1',
+    port: 4175,
+    strictPort: true
   },
   optimizeDeps: {
     // Limit dependency scan to our app pages so Vite does not crawl the entire user profile for *.html
@@ -20,7 +41,8 @@ export default defineConfig({
       resolve(__dirname, 'src/html/room5.html'),
       resolve(__dirname, 'src/html/control.html'),
       resolve(__dirname, 'src/html/timing.html'),
-      resolve(__dirname, 'src/html/index.html')
+      resolve(__dirname, 'src/html/index.html'),
+      resolve(__dirname, 'src/html/spotify.html')
     ]
   },
   build: {
@@ -35,7 +57,8 @@ export default defineConfig({
         room5: resolve(__dirname, 'src/html/room5.html'),
         control: resolve(__dirname, 'src/html/control.html'),
         timing: resolve(__dirname, 'src/html/timing.html'),
-        index: resolve(__dirname, 'src/html/index.html')
+        index: resolve(__dirname, 'src/html/index.html'),
+        spotify: resolve(__dirname, 'src/html/spotify.html')
       }
     }
   },
@@ -47,7 +70,7 @@ export default defineConfig({
         // Move HTML files from dist/src/html to dist root
         const htmlDir = join(__dirname, 'dist', 'src', 'html');
         const distDir = join(__dirname, 'dist');
-        
+
         try {
           const files = readdirSync(htmlDir);
           files.forEach(file => {

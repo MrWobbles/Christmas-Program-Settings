@@ -1,0 +1,1378 @@
+@use "common";
+
+// ========================================
+// DESIGN TOKENS
+// ========================================
+$widget-blur: 40px;
+$widget-bg: rgba(255, 255, 255, 0.12);
+$widget-border: rgba(255, 255, 255, 0.18);
+$widget-radius: 24px;
+$widget-radius-sm: 16px;
+$accent-blue: #5b8def;
+$accent-green: #1db954;
+$grid-gap: 40px;
+
+// ========================================
+// BASE STYLES
+// ========================================
+.room-spotify {
+  background: #000;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
+  min-height: 100vh;
+  overflow: hidden;
+}
+
+// Stars canvas (background layer)
+.canvas {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+}
+
+// Vignette overlay
+.vignette {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2;
+  background: radial-gradient(ellipse at center, transparent 0%, transparent 60%, rgba(0, 0, 0, 0.4) 100%);
+}
+
+// ========================================
+// CSS GRID LAYOUT
+// ========================================
+.page-grid {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  grid-template-rows: auto 1fr auto;
+  grid-template-areas:
+    "top-left    top-center    top-right"
+    "middle-left middle-center middle-right"
+    "bottom-left bottom-center bottom-right";
+  padding: $grid-gap;
+  gap: $grid-gap;
+  pointer-events: none; // Allow clicking through empty areas
+}
+
+.grid-cell {
+  pointer-events: auto; // Re-enable pointer events on cells with content
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  &--top-left {
+    grid-area: top-left;
+    align-items: flex-start;
+    justify-content: flex-start;
+    max-width: 220px;
+  }
+
+  &--top-center {
+    grid-area: top-center;
+    align-items: center;
+    justify-content: flex-start;
+  }
+
+  &--top-right {
+    grid-area: top-right;
+    align-items: flex-end;
+    justify-content: flex-start;
+  }
+
+  &--bottom-left {
+    grid-area: bottom-left;
+    align-items: flex-start;
+    justify-content: flex-end;
+  }
+
+  &--bottom-center {
+    grid-area: bottom-center;
+    align-items: center;
+    justify-content: flex-end;
+  }
+
+  &--bottom-right {
+    grid-area: bottom-right;
+    align-items: flex-end;
+    justify-content: flex-end;
+    max-width: 300px;
+  }
+}
+
+// ========================================
+// WIDGET CARD BASE
+// ========================================
+.widget-card {
+  background: $widget-bg;
+  backdrop-filter: blur($widget-blur);
+  -webkit-backdrop-filter: blur($widget-blur);
+  border-radius: $widget-radius;
+  border: 1px solid $widget-border;
+  padding: 16px;
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+// ========================================
+// CLOCK WIDGET
+// ========================================
+.widget-clock {
+  width: 200px;
+  height: 200px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+
+  &__dots {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  &__dot {
+    position: absolute;
+    width: 5px;
+    height: 5px;
+    background: white;
+    border-radius: 50%;
+    opacity: 0.3;
+    transition: opacity 0.15s ease;
+    // Position set via JS for square perimeter
+
+    &--active {
+      opacity: 1;
+    }
+
+    // Make every 5th dot (hour markers) slightly larger
+    &--hour {
+      width: 7px;
+      height: 7px;
+    }
+  }
+
+  &__content {
+    text-align: center;
+    z-index: 1;
+  }
+
+  &__time {
+    font-size: 48px;
+    font-weight: 200;
+    color: white;
+    letter-spacing: -2px;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+  }
+
+  &__date {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.5);
+    font-weight: 500;
+    margin-top: 4px;
+  }
+}
+
+// ========================================
+// WEATHER WIDGET
+// ========================================
+.widget-weather {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  &__icon {
+    width: 40px;
+    height: 40px;
+    color: #ffd93d;
+    flex-shrink: 0;
+
+    svg {
+      width: 100%;
+      height: 100%;
+    }
+  }
+
+  &__info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__temp {
+    font-size: 24px;
+    font-weight: 500;
+    color: white;
+    line-height: 1.1;
+  }
+
+  &__desc {
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.5);
+    text-transform: capitalize;
+  }
+}
+
+// ========================================
+// CALENDAR WIDGET - 3-Day Timeline View
+// ========================================
+$calendar-hour-height: 40px;
+$calendar-start-hour: 5; // 5 AM
+$calendar-end-hour: 24; // Midnight (show through 11 PM)
+$calendar-total-hours: $calendar-end-hour - $calendar-start-hour;
+$calendar-timeline-height: $calendar-hour-height * $calendar-total-hours;
+
+.widget-calendar {
+  width: 600px;
+  height: 400px;
+  padding: 0;
+  position: relative;
+  overflow: hidden;
+
+  &__grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    height: 100%;
+    position: relative;
+  }
+
+  &__day-col {
+    display: flex;
+    flex-direction: column;
+    border-left: 1px solid rgba(255, 255, 255, 0.1);
+    position: relative;
+
+    &:first-child {
+      border-left: none;
+    }
+  }
+
+  &__day-header {
+    padding: 12px 8px;
+    text-align: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    flex-shrink: 0;
+  }
+
+  &__weekday {
+    font-size: 11px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.5);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  &__day-num {
+    font-size: 32px;
+    font-weight: 200;
+    color: white;
+    line-height: 1.1;
+  }
+
+  // First column (today) gets accent color
+  &__day-col:first-child &__day-num {
+    color: white;
+  }
+
+  &__all-day {
+    min-height: 24px;
+    padding: 4px 4px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex-shrink: 0;
+  }
+
+  &__all-day-event {
+    font-size: 10px;
+    padding: 2px 6px;
+    border-radius: 3px;
+    background: rgba(91, 141, 239, 0.3);
+    color: rgba(255, 255, 255, 0.9);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    border-left: 2px solid #5b8def;
+
+    &--holiday {
+      background: rgba(255, 215, 0, 0.2);
+      border-left-color: #ffd700;
+    }
+  }
+
+  &__timeline {
+    flex: 1;
+    position: relative;
+    overflow-y: auto;
+    overflow-x: hidden;
+
+    // Hide scrollbar but keep functionality
+    scrollbar-width: none;
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  }
+
+  &__timeline-inner {
+    height: #{$calendar-timeline-height};
+    position: relative;
+  }
+
+  // Hour grid lines
+  &__hour-line {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: rgba(255, 255, 255, 0.05);
+  }
+
+  &__hour-label {
+    position: absolute;
+    left: 4px;
+    font-size: 9px;
+    color: rgba(255, 255, 255, 0.25);
+    transform: translateY(-50%);
+    pointer-events: none;
+  }
+
+  // Events
+  &__event {
+    position: absolute;
+    left: 2px;
+    right: 2px;
+    min-height: 20px;
+    padding: 3px 6px;
+    border-radius: 4px;
+    background: rgba(91, 141, 239, 0.4);
+    border-left: 3px solid #5b8def;
+    overflow: hidden;
+    cursor: pointer;
+    transition: background 0.15s ease;
+
+    &:hover {
+      background: rgba(91, 141, 239, 0.55);
+    }
+  }
+
+  &__event-title {
+    font-size: 11px;
+    font-weight: 500;
+    color: white;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &__event-time {
+    font-size: 9px;
+    color: rgba(255, 255, 255, 0.6);
+  }
+
+  // Now line (current time indicator)
+  &__now-line {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: #ff3b30;
+    z-index: 10;
+    pointer-events: none;
+    display: none;
+
+    &::before {
+      content: "";
+      position: absolute;
+      left: -4px;
+      top: -3px;
+      width: 8px;
+      height: 8px;
+      background: #ff3b30;
+      border-radius: 50%;
+    }
+  }
+
+  &__more-events {
+    font-size: 10px;
+    color: rgba(255, 255, 255, 0.5);
+    padding: 4px 6px;
+    border-left: 3px solid rgba(255, 255, 255, 0.2);
+    margin: 2px;
+  }
+
+  &__empty-overlay {
+    position: absolute;
+    top: 10px;
+    right: 8px;
+    padding: 3px 8px;
+    border-radius: 999px;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+    color: rgba(255, 255, 255, 0.8);
+    background: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    pointer-events: none;
+  }
+}
+
+// ========================================
+// BIBLE VERSE WIDGET
+// ========================================
+.widget-bible {
+  padding: 20px 24px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 400px;
+
+  &__icon {
+    width: 28px;
+    height: 28px;
+    color: rgba(255, 255, 255, 0.4);
+    margin-bottom: 12px;
+
+    svg {
+      width: 100%;
+      height: 100%;
+    }
+  }
+
+  &__verse {
+    font-size: 15px;
+    color: rgba(255, 255, 255, 0.9);
+    line-height: 1.6;
+    font-style: italic;
+    margin-bottom: 10px;
+    transition: opacity 0.3s ease;
+  }
+
+  &__ref {
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.45);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: opacity 0.3s ease;
+  }
+}
+
+// ========================================
+// SPOTIFY NOW PLAYING WIDGET
+// ========================================
+.widget-now-playing {
+  display: flex;
+  gap: 12px;
+  padding: 12px;
+  width: 100%;
+
+  &__album {
+    width: 64px;
+    height: 64px;
+    border-radius: 10px;
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0.05);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    flex-shrink: 0;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+  }
+
+  &__placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: rgba(255, 255, 255, 0.2);
+
+    svg {
+      width: 28px;
+      height: 28px;
+    }
+  }
+
+  &__content {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  &__info {
+    margin-bottom: 6px;
+  }
+
+  &__title {
+    color: white;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.2;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__artist {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 12px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__progress {
+    margin-bottom: 6px;
+  }
+
+  &__progress-bar {
+    height: 3px;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 1.5px;
+    overflow: hidden;
+    margin-bottom: 4px;
+  }
+
+  &__progress-fill {
+    height: 100%;
+    background: white;
+    border-radius: 1.5px;
+    width: 0%;
+    transition: width 0.5s linear;
+  }
+
+  &__time {
+    display: flex;
+    justify-content: space-between;
+    color: rgba(255, 255, 255, 0.4);
+    font-size: 10px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  &__controls {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+}
+
+// ========================================
+// CONTROL BUTTONS
+// ========================================
+.widget-control-btn {
+  width: 32px;
+  height: 32px;
+  background: rgba(255, 255, 255, 0.15);
+  border: none;
+  border-radius: 50%;
+  color: white;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+
+  svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  &--sm {
+    width: 28px;
+    height: 28px;
+
+    svg {
+      width: 12px;
+      height: 12px;
+    }
+  }
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.25);
+    transform: scale(1.05);
+  }
+
+  &:active {
+    transform: scale(0.95);
+  }
+}
+
+// Playlist toggle button state
+.widget-playlist-toggle {
+  &.in-playlist {
+    background: rgba($accent-green, 0.4);
+    color: $accent-green;
+
+    .icon-add {
+      display: none;
+    }
+    .icon-check {
+      display: block !important;
+    }
+  }
+
+  &.no-playlist {
+    .icon-add {
+      display: block;
+    }
+    .icon-check {
+      display: none !important;
+    }
+  }
+
+  &:not(.in-playlist):not(.no-playlist) {
+    opacity: 0.3;
+    cursor: not-allowed;
+  }
+}
+
+// ========================================
+// IDLE MINI WIDGET
+// ========================================
+.widget-idle-mini {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 13px;
+
+  &__icon {
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+
+    svg {
+      width: 100%;
+      height: 100%;
+    }
+  }
+}
+
+// ========================================
+// SETTINGS MENU
+// ========================================
+.settings-menu {
+  position: relative;
+
+  &__trigger {
+    width: 44px;
+    height: 44px;
+    background: $widget-bg;
+    backdrop-filter: blur($widget-blur);
+    -webkit-backdrop-filter: blur($widget-blur);
+    border: 1px solid $widget-border;
+    border-radius: 50%;
+    color: rgba(255, 255, 255, 0.6);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+
+    svg {
+      width: 22px;
+      height: 22px;
+      transition: transform 0.3s ease;
+    }
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.18);
+      color: white;
+
+      svg {
+        transform: rotate(45deg);
+      }
+    }
+  }
+
+  &__panel {
+    display: none;
+    position: absolute;
+    bottom: 56px;
+    left: 0;
+    background: $widget-bg;
+    backdrop-filter: blur($widget-blur);
+    -webkit-backdrop-filter: blur($widget-blur);
+    border: 1px solid $widget-border;
+    border-radius: $widget-radius;
+    width: 280px;
+    max-height: 70vh;
+    overflow-y: auto;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    padding: 8px;
+
+    &.open {
+      display: block;
+    }
+  }
+
+  &__section {
+    padding: 12px;
+    border-radius: $widget-radius-sm;
+
+    &:not(:last-child) {
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    &--hidden {
+      display: none;
+    }
+  }
+
+  &__section-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 10px;
+
+    svg {
+      width: 14px;
+      height: 14px;
+    }
+  }
+
+  &__themes {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  &__rooms {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+
+    a {
+      display: block;
+      padding: 8px 10px;
+      color: rgba(255, 255, 255, 0.8);
+      text-decoration: none;
+      font-size: 12px;
+      border-radius: 8px;
+      transition: background 0.2s;
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.1);
+        color: white;
+      }
+    }
+  }
+
+  &__calendar {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+
+    &--connected {
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+    }
+  }
+
+  &__connected-text {
+    color: #34c759;
+    font-size: 12px;
+    font-weight: 500;
+  }
+
+  &__disconnect-small {
+    background: rgba(255, 80, 80, 0.15);
+    border: 1px solid rgba(255, 80, 80, 0.3);
+    color: #ff8080;
+    padding: 6px 10px;
+    font-size: 10px;
+    font-weight: 500;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+
+    &:hover {
+      background: rgba(255, 80, 80, 0.25);
+    }
+  }
+
+  &__input {
+    flex: 1;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 8px;
+    padding: 8px 10px;
+    color: white;
+    font-size: 11px;
+    outline: none;
+    transition: all 0.2s;
+
+    &::placeholder {
+      color: rgba(255, 255, 255, 0.4);
+    }
+
+    &:focus {
+      border-color: rgba(255, 255, 255, 0.3);
+      background: rgba(255, 255, 255, 0.15);
+    }
+  }
+
+  &__save-btn {
+    background: $accent-blue;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 12px;
+    color: white;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+
+    &:hover {
+      background: lighten($accent-blue, 5%);
+    }
+  }
+
+  &__hint {
+    font-size: 9px;
+    color: rgba(255, 255, 255, 0.35);
+    margin-top: 6px;
+    line-height: 1.4;
+  }
+
+  &__disconnect {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    background: rgba(255, 80, 80, 0.15);
+    border: 1px solid rgba(255, 80, 80, 0.3);
+    color: #ff8080;
+    padding: 10px 14px;
+    font-size: 13px;
+    font-weight: 500;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+
+    svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    &:hover {
+      background: rgba(255, 80, 80, 0.25);
+      color: #ff9999;
+    }
+  }
+}
+
+// ========================================
+// COMPACT LOGIN (in settings)
+// ========================================
+.widget-login-compact {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  &__icon {
+    width: 32px;
+    height: 32px;
+    color: $accent-green;
+    flex-shrink: 0;
+
+    svg {
+      width: 100%;
+      height: 100%;
+    }
+  }
+
+  &__info {
+    flex: 1;
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 13px;
+  }
+
+  &__btn {
+    background: $accent-green;
+    color: black;
+    border: none;
+    padding: 8px 14px;
+    font-size: 12px;
+    font-weight: 600;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: all 0.2s;
+
+    &:hover {
+      background: #1ed760;
+    }
+  }
+}
+
+.widget-login__error {
+  color: #ff6b6b;
+  margin-top: 8px;
+  font-size: 12px;
+}
+
+// ========================================
+// QUEUE WIDGET (standalone)
+// ========================================
+.widget-queue {
+  padding: 12px;
+  width: 200px;
+
+  &__header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 10px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+
+    svg {
+      width: 14px;
+      height: 14px;
+    }
+  }
+}
+
+.widget-queue__list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-height: 150px;
+  overflow-y: auto;
+
+  &::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 2px;
+  }
+}
+
+.widget-queue-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px;
+  border-radius: 8px;
+  transition: background 0.2s;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.08);
+  }
+
+  &__art {
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    overflow: hidden;
+    flex-shrink: 0;
+    background: rgba(255, 255, 255, 0.05);
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+  }
+
+  &__info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__title {
+    color: white;
+    font-size: 11px;
+    font-weight: 500;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__artist {
+    color: rgba(255, 255, 255, 0.4);
+    font-size: 10px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+// ========================================
+// PLAYLISTS LIST
+// ========================================
+.widget-playlists__list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-height: 180px;
+  overflow-y: auto;
+
+  &::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 2px;
+  }
+}
+
+.widget-playlist-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.2s;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.08);
+
+    .widget-playlist-item__play,
+    .widget-playlist-item__select {
+      opacity: 1;
+    }
+  }
+
+  &.selected {
+    background: rgba($accent-green, 0.15);
+    border: 1px solid rgba($accent-green, 0.3);
+    margin: -1px;
+  }
+
+  &.readonly {
+    opacity: 0.5;
+  }
+
+  &__art {
+    width: 32px;
+    height: 32px;
+    border-radius: 4px;
+    overflow: hidden;
+    flex-shrink: 0;
+    background: rgba(255, 255, 255, 0.05);
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+  }
+
+  &__info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__name {
+    color: white;
+    font-size: 11px;
+    font-weight: 500;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__tracks {
+    color: rgba(255, 255, 255, 0.35);
+    font-size: 9px;
+  }
+
+  &__actions {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex-shrink: 0;
+  }
+
+  &__play,
+  &__select {
+    width: 22px;
+    height: 22px;
+    border: none;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    opacity: 0;
+    transition:
+      opacity 0.2s,
+      transform 0.2s;
+    flex-shrink: 0;
+
+    &:hover {
+      transform: scale(1.1);
+    }
+  }
+
+  &__play {
+    background: $accent-green;
+
+    svg {
+      width: 10px;
+      height: 10px;
+      fill: black;
+      margin-left: 1px;
+    }
+  }
+
+  &__select {
+    background: rgba(255, 255, 255, 0.1);
+
+    svg {
+      width: 12px;
+      height: 12px;
+      fill: white;
+    }
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+  }
+
+  &.selected &__select {
+    opacity: 1;
+    background: rgba($accent-green, 0.4);
+
+    svg {
+      fill: $accent-green;
+    }
+  }
+}
+
+// ========================================
+// UTILITY CLASSES
+// ========================================
+.widget-empty {
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 11px;
+  text-align: center;
+  padding: 16px;
+}
+
+.readonly-badge {
+  font-size: 8px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: rgba(255, 255, 255, 0.3);
+  margin-left: 4px;
+}
+
+// ========================================
+// THEME BUTTONS
+// ========================================
+.theme-btn {
+  width: 32px;
+  height: 32px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 2px solid transparent;
+  border-radius: 8px;
+  color: rgba(255, 255, 255, 0.7);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+
+  svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  span {
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+  }
+
+  &.active {
+    background: rgba(255, 255, 255, 0.25);
+    border-color: rgba(255, 255, 255, 0.4);
+    color: white;
+  }
+}
+
+// ========================================
+// THEME BACKGROUNDS
+// ========================================
+.room-spotify {
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+
+  &.theme-stars {
+    background: #000;
+  }
+
+  &.theme-emmanuel {
+    background: #000;
+  }
+
+  &.theme-twilight {
+    background-image: url("/img/Room2.png");
+  }
+
+  &.theme-faithful {
+    background-image: url("/img/Room3.png");
+  }
+
+  &.theme-joy {
+    background-image: url("/img/Room4.png");
+  }
+
+  &.theme-silent {
+    background: linear-gradient(180deg, #0a1628 0%, #1a2a4a 50%, #2a3a5a 100%);
+  }
+}
+
+// ========================================
+// RESPONSIVE: TABLET
+// ========================================
+@media (max-width: 900px) {
+  .page-grid {
+    padding: 16px;
+    gap: 16px;
+  }
+
+  .grid-cell {
+    &--top-left {
+      max-width: 180px;
+    }
+
+    &--bottom-right {
+      max-width: 260px;
+    }
+  }
+
+  .widget-clock__time {
+    font-size: 40px;
+  }
+
+  .widget-calendar__day {
+    font-size: 38px;
+  }
+
+  .widget-bible {
+    max-width: 320px;
+
+    &__verse {
+      font-size: 14px;
+    }
+  }
+}
+
+// ========================================
+// RESPONSIVE: MOBILE
+// ========================================
+@media (max-width: 600px) {
+  .page-grid {
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto auto 1fr auto;
+    grid-template-areas:
+      "top-left    top-left"
+      "top-center  top-center"
+      "middle      middle"
+      "bottom-left bottom-right";
+    padding: 12px;
+    gap: 12px;
+  }
+
+  .grid-cell {
+    &--top-left {
+      flex-direction: row;
+      flex-wrap: wrap;
+      max-width: none;
+      justify-content: flex-start;
+    }
+
+    &--top-center {
+      align-items: stretch;
+    }
+
+    &--top-right,
+    &--bottom-center {
+      display: none;
+    }
+
+    &--bottom-left {
+      align-items: flex-start;
+    }
+
+    &--bottom-right {
+      align-items: flex-end;
+      max-width: none;
+    }
+  }
+
+  .widget-clock,
+  .widget-weather {
+    flex: 1;
+    min-width: 120px;
+  }
+
+  .widget-calendar {
+    width: 100%;
+  }
+
+  .widget-bible {
+    max-width: none;
+    padding: 16px;
+
+    &__verse {
+      font-size: 13px;
+    }
+  }
+
+  .widget-clock__time {
+    font-size: 32px;
+  }
+
+  .widget-calendar__day {
+    font-size: 32px;
+  }
+
+  .settings-menu__panel {
+    width: calc(100vw - 24px);
+    max-width: 300px;
+  }
+}
